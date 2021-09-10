@@ -1,4 +1,7 @@
+debug
 src/snek.asm
 src/AddSub2.asm
 src/hello.asm
-debug
+src/StructExample.asm
+src/Blackjack.asm
+mllink$.lnk
