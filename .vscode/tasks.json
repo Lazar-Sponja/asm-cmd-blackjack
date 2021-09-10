@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "ml.exe",
+            "args": [
+                "/Sa",
+                "/Zi", 
+                "/Fodebug\\${fileBasenameNoExtension}.obj",
+                "/I\"c:\\Irvine\"",
+                "/W3",
+                "/Ta${file}",
+                "/link",
+                "/OUT:debug\\${fileBasenameNoExtension}.exe", 
+                "/LIBPATH:c:\\Irvine", 
+                "user32.lib",
+                "irvine32.lib",
+                "kernel32.lib",
+                "/DEBUG",
+                "/PDB:debug\\${fileBasenameNoExtension}.pdb",
+                "/SUBSYSTEM:CONSOLE",
+                "/DYNAMICBASE:NO",
+                "/MACHINE:X86",
+                "/SAFESEH:NO",
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": "build"
+        },
+    ]
+}
