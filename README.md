@@ -1,2 +1,2 @@
-# asm-cmd-blackjack
+# Command Line Blackjack
 Command line black jack game written in masm x86 assembly code. Literal school project
