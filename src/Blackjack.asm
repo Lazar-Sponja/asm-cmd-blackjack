@@ -46,36 +46,36 @@ include macros.inc
 .data
 	;// Stringovi za ispis WELCOME screena i izbor brzine zmijice
 
-	DealerInterface byte 117, 13"   |                                                                                                ____________   ",0, 
-	                    		"----                                                                                               '|B       ! |   ",0,
-	                   		 	"                                                                                                  '||  L   J   |   ",0,
-								"                                                                                                  |||    A     |   ",0,
-								"                                                                                                  |||   C  C   |   ",0,
-	                 		    "                                                                                                  ||| K      K |   ",0,
-	             		        "                                                                                                  |||__________|   ",0,
-	             	 	        "                                                                                                  |'__________'    ",0,
-	            		        "                                                                                                                   ",0,
-		           		        "                                                                                                                   ",0,
-	                		    "                                                                                                                   ",0,
-	               		        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",0,
+	DealerInterface byte 116, 13,"   |                                                                                                ____________   ",0
+                             byte"----                                                                                               '|B       ! |   ",0
+                             byte"                                                                                                  '||  L   J   |   ",0
+                             byte"                                                                                                  |||    A     |   ",0
+                             byte"                                                                                                  |||   C  C   |   ",0
+                             byte"                                                                                                  ||| K      K |   ",0
+                             byte"                                                                                                  |||__________|   ",0
+                             byte"                                                                                                  |'__________'    ",0
+                             byte"                                                                                                                   ",0
+                             byte"                                                                                                                   ",0
+                             byte"                                                                                                                   ",0
+                             byte"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",0
 
-	ThreePlayerInterface byte 40, 18"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",0,
-								    "|   |                                 |",0,
-							   	    "|----                                 |",0,
-							  		"|                                     |",0,
-							 		"|                                     |",0,
-									"|                                     |",0,
-									"|                                     |",0,
-									"|                                     |",0,
-									"|                                     |",0,
-									"|                                     |",0,
-							  		"|                                     |",0,
-							 		"|                                     |",0,
-							 		"|                                     |",0,
-							 		"|                                     |",0,
-									"|                                     |",0,
-									"|                                     |",0,
-									".......................................",0,
+	ThreePlayerInterface byte 40, 17,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",0
+								 byte"|   |                                 |",0
+							   	 byte"|----                                 |",0
+							  	 byte"|                                     |",0
+							 	 byte"|                                     |",0
+								 byte"|                                     |",0
+								 byte"|                                     |",0
+								 byte"|                                     |",0
+								 byte"|                                     |",0
+								 byte"|                                     |",0
+							  	 byte"|                                     |",0
+							 	 byte"|                                     |",0
+							 	 byte"|                                     |",0
+							 	 byte"|                                     |",0
+								 byte"|                                     |",0
+								 byte"|                                     |",0
+								 byte".......................................",0
 	
     CardLookUpTable byte "123456789xJQK"
     CardLookUPNumber10 byte "10",0
@@ -136,8 +136,8 @@ include macros.inc
 	BrojRedovaCrtanjeKarta byte ?
 	BrojNacrtanihKarata byte ?
 	BrojIgraca byte ?
-	Okruzenja OkruzenjeIgraca 4 dup(?)
-	Igraci Igrac 4 dup(?)
+	Okruzenja OkruzenjeIgraca 4 dup(<?>)
+	Igraci Igrac 4 dup(<?>)
 
 .code
 ;// -----------------------------------------------------------------------------------------------------------
@@ -155,13 +155,6 @@ include macros.inc
 main PROC
 
 
-    mov dh, 10
-    mov dl, 20
-    mov ebx, offset Igrac1Karte
-    movzx eax, Igrac1BrojKarata
-    mov ch, 15
-	mov cl, 5
-
 	mov BrojIgraca, 4
 	mov AktivniIgrac, 0
 	;/////////prep values
@@ -173,23 +166,23 @@ main PROC
 	ADD esi, 4
 	mov [esi], offset DealerInterface;pointer ka sprajtu interfacea
 	ADD esi, 4
-	mov [esi], 40;okvir u kome se dele karte
+	mov byte ptr [esi], 40;okvir u kome se dele karte
 	INC esi
-	mov [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	mov byte ptr [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
 	INC esi
-	mov [esi], 0;gde se crta prozor x
+	mov byte ptr [esi], 0;gde se crta prozor x
 	INC esi
-	mov [esi], 0;gde se crta prozor y
+	mov byte ptr [esi], 0;gde se crta prozor y
 	INC esi
-	mov [esi], 40;centar odakle se crtaju karte x
+	mov byte ptr [esi], 40;centar odakle se crtaju karte x
 	INC esi
-	mov [esi], 5;centar odakle se crtaju karte y
+	mov byte ptr [esi], 5;centar odakle se crtaju karte y
 
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 
 	INC esi;okruzenje 2
 	ADD edx, 22;igrac 2
@@ -198,23 +191,23 @@ main PROC
 	ADD esi, 4
 	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
 	ADD esi, 4
-	mov [esi], 14;okvir u kome se dele karte
+	mov byte ptr [esi], 14;okvir u kome se dele karte
 	INC esi
-	mov [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
 	INC esi
-	mov [esi], 0;gde se crta prozor x
+	mov byte ptr [esi], 0;gde se crta prozor x
 	INC esi
-	mov [esi], 12;gde se crta prozor y
+	mov byte ptr [esi], 11;gde se crta prozor y
 	INC esi
-	mov [esi], 6;centar odakle se crtaju karte x
+	mov byte ptr [esi], 6;centar odakle se crtaju karte x
 	INC esi
-	mov [esi], 20;centar odakle se crtaju karte y
+	mov byte ptr [esi], 20;centar odakle se crtaju karte y
 
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 
 	INC esi;okruzenje 3
 	ADD edx, 22;igrac 3
@@ -223,23 +216,24 @@ main PROC
 	ADD esi, 4
 	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
 	ADD esi, 4
-	mov [esi], 14;okvir u kome se dele karte
+    
+	mov byte ptr [esi], 14;okvir u kome se dele karte
 	INC esi
-	mov [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
 	INC esi
-	mov [esi], 39;gde se crta prozor x
+	mov byte ptr [esi], 38;gde se crta prozor x
 	INC esi
-	mov [esi], 12;gde se crta prozor y
+	mov byte ptr [esi], 11;gde se crta prozor y
 	INC esi
-	mov [esi], 45;centar odakle se crtaju karte x
+	mov byte ptr [esi], 45;centar odakle se crtaju karte x
 	INC esi
-	mov [esi], 20;centar odakle se crtaju karte y
+	mov byte ptr [esi], 20;centar odakle se crtaju karte y
 
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 
 	INC esi;okruzenje 4
 	ADD edx, 22;igrac 4
@@ -248,23 +242,23 @@ main PROC
 	ADD esi, 4
 	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
 	ADD esi, 4
-	mov [esi], 14;okvir u kome se dele karte
+	mov byte ptr [esi], 14;okvir u kome se dele karte
 	INC esi
-	mov [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
 	INC esi
-	mov [esi], 78;gde se crta prozor x
+	mov byte ptr [esi], 76;gde se crta prozor x
 	INC esi
-	mov [esi], 12;gde se crta prozor y
+	mov byte ptr [esi], 11;gde se crta prozor y
 	INC esi
-	mov [esi], 84;centar odakle se crtaju karte x
+	mov byte ptr [esi], 84;centar odakle se crtaju karte x
 	INC esi
-	mov [esi], 20;centar odakle se crtaju karte y
+	mov byte ptr [esi], 20;centar odakle se crtaju karte y
 
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 	INC edx
-	mov [edx], 0
+	mov byte ptr [edx], 0
 
 	GameLoop:
 
@@ -279,26 +273,27 @@ main ENDP
 ;// --------------------------------------------------------------------------------------------
 
 
-DrawBackGround PROC USES eax ebx edx
-	mov eax, BrojIgraca
+DrawBackGround PROC USES eax ebx edx ecx
+    mov eax, brown + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
+    call SetTextColor  
+	movzx eax, BrojIgraca
 	;mov ebx, AktivniIgrac
-	mov ebx, offset Okruzenja
-	ADD ebx, 4;adresa sprajta za okruzenje
-	mov edx, ebx
-	ADD edx, 6
-	mov dx, [edx]
+	mov ecx, offset Okruzenja
+	ADD ecx, 4;adresa sprajta za okruzenje
+	mov ebx, [ecx]
+	ADD ecx, 6
+	mov dx, [ecx]
 	DrawPlayerInterfaces: 
-	push eax
-	push ebx
+
+
 	call DrawSprite
-	pop ebx
-	pop eax
+
 	DEC eax
 
-	ADD ebx, 14
-	mov edx, ebx
-	ADD edx, 6
-
+	ADD ecx, 8
+	mov ebx, [ecx]
+	ADD ecx, 6
+    mov dx, [ecx]
 	cmp eax,0
 	jne DrawPlayerInterfaces
 
@@ -310,9 +305,9 @@ NacrtajKarateIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za 
 
 	mov ebx, [esi];pointer na igraca
 	ADD esi, 8
-	mov cx [esi];granice prozora i koliko karata moze da ima prozor u jednom redu
+	mov cx, [esi];granice prozora i koliko karata moze da ima prozor u jednom redu
 	ADD esi,4 
-	movzx eax, [ebx]
+	movzx eax, byte ptr [ebx]
 	mov esi, ebx; esi je sada pointer na igraca
 
 
@@ -419,88 +414,88 @@ DrawCard PROC USES eax edx ebx ;eax temp, edx possisiton, bx indeks karte
 
 
 
-push edx
-push ebx
-AND ebx, 3; moduo od 4 lol
+    push edx
+    push ebx
+    AND ebx, 3; moduo od 4 lol
 
-cmp bl, 0
-je Diamond
-cmp bl, 1
-je RoundLeafThing
-cmp bl, 2
-je Heart
-;ne treba poredjenje za poslednji jer je sigurno taj
-
-
-mov eax, black + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
-call SetTextColor      
-mov ebx, offset Card3 
-call DrawSprite
-jmp FinishDrawingCardFrame
-
-Diamond:
-mov eax, red + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
-call SetTextColor      
-mov ebx, offset Card0 
-call DrawSprite
-jmp FinishDrawingCardFrame
-
-RoundLeafThing:
-mov eax, black + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
-call SetTextColor      
-mov ebx, offset Card1 
-call DrawSprite
-jmp FinishDrawingCardFrame
-
-Heart:
-mov eax, red + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
-call SetTextColor      
-mov ebx, offset Card2 
-call DrawSprite
-
-FinishDrawingCardFrame:
+    cmp bl, 0
+    je Diamond
+    cmp bl, 1
+    je RoundLeafThing
+    cmp bl, 2
+    je Heart
+    ;ne treba poredjenje za poslednji jer je sigurno taj
 
 
-pop edx
+    mov eax, black + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
+    call SetTextColor      
+    mov ebx, offset Card3 
+    call DrawSprite
+    jmp FinishDrawingCardFrame
 
-SHR edx, 2
+    Diamond:
+    mov eax, red + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
+    call SetTextColor      
+    mov ebx, offset Card0 
+    call DrawSprite
+    jmp FinishDrawingCardFrame
 
-cmp edx, 9
-je CardNumber10
+    RoundLeafThing:
+    mov eax, black + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
+    call SetTextColor      
+    mov ebx, offset Card1 
+    call DrawSprite
+    jmp FinishDrawingCardFrame
+
+    Heart:
+    mov eax, red + (lightGray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
+    call SetTextColor      
+    mov ebx, offset Card2 
+    call DrawSprite
+
+    FinishDrawingCardFrame:
 
 
-mov ebx, offset CardLookUpTable
-ADD ebx, edx
-mov al, [ebx]
-pop edx
-INC dh
-INC dl
-call GotoXY
-call WriteChar
+    pop edx
 
-ADD dh, 6
-ADD dl, 9
-call GotoXY
-call WriteChar
-jmp FinishDrawingCard
+    SHR edx, 2
 
-CardNumber10:
+    cmp edx, 9
+    je CardNumber10
 
-pop eax
-mov edx, eax
-INC dh
-INC dl
-call GotoXY
-mov edx, offset CardLookUPNumber10
-call writeString
-mov edx, eax
-ADD dh, 7
-ADD dl, 9
-call GotoXY
-mov edx, offset CardLookUPNumber10
-call writeString
 
-FinishDrawingCard:
+    mov ebx, offset CardLookUpTable
+    ADD ebx, edx
+    mov al, [ebx]
+    pop edx
+    INC dh
+    INC dl
+    call GotoXY
+    call WriteChar
+
+    ADD dh, 6
+    ADD dl, 9
+    call GotoXY
+    call WriteChar
+    jmp FinishDrawingCard
+
+    CardNumber10:
+
+    pop eax
+    mov edx, eax
+    INC dh
+    INC dl
+    call GotoXY
+    mov edx, offset CardLookUPNumber10
+    call writeString
+    mov edx, eax
+    ADD dh, 7
+    ADD dl, 9
+    call GotoXY
+    mov edx, offset CardLookUPNumber10
+    call writeString
+
+    FinishDrawingCard:
 
 RET
 
@@ -510,24 +505,24 @@ DrawSprite PROC USES eax edx ebx ;eax temp, edx are the coordinates where to dra
 
 
 
-mov ah, [ebx]
-INC ebx
-mov al, [ebx]
-INC ebx
-SpriteDrawLoop:
-call GotoXY
-push edx
-mov edx, ebx
-call writeString
-movzx edx, ah
-ADD ebx, edx
-pop edx
-INC dh
-DEC al
-cmp al, 0
-jne SpriteDrawLoop
+    mov ah, [ebx]
+    INC ebx
+    mov al, [ebx]
+    INC ebx
+    SpriteDrawLoop:
+    call GotoXY
+    push edx
+    mov edx, ebx
+    call WriteString
+    movzx edx, ah
+    ADD ebx, edx
+    pop edx
+    INC dh
+    DEC al
+    cmp al, 0
+    jne SpriteDrawLoop
 
-RET
+    RET
 DrawSprite ENDP
 
 END main
