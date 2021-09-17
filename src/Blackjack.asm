@@ -28,12 +28,15 @@ OdaberiKartu MACRO
 	call RandomRange
 ENDM
 
+BackgroundColor = Gray
+CardBackground = Gray
+
 .const
 	;// Definisanje velicine prozora 
 	xmin = 0	;// leva ivica
-	xmax = 99	;// desna ivica
+	xmax = 118	;// desna ivica
 	ymin = 0	;// gornja ivica
-	ymax = 31	;// donja ivica
+	ymax = 32	;// donja ivica
 
 	;// Oznake za levo, desno, gore, dole, ESC, ASCII
 	LEFT_KEY = 025h        
@@ -107,6 +110,18 @@ ENDM
     StandButtonSprite byte 17,3,"----------------",0, "|   S T A N D  |", 0,"----------------",0
     DoublDownButtonSprite byte 29,3,"----------------------------",0, "|   D O U B L E   D O W N  |", 0,"----------------------------",0
 
+	BlackJackSprite byte 34,10,"     _--------_            /----|", 0
+					byte	   "   /   _____   \          /     |", 0
+					byte	   "  |__/      |   |        /--/|  |", 0
+					byte	   "            /   /            |  |", 0
+					byte	   "          /   /              |  |", 0
+					byte	   "        /   /                |  |", 0
+					byte	   "      /   /                  |  |", 0
+					byte	   "    /   /                    |  |", 0
+					byte	   "  /   /___________           |  |", 0
+					byte	   " |                |          |__|", 0
+
+
 	Igrac STRUCT
 		cardCount BYTE 0
 		pointCount BYTE 0
@@ -120,6 +135,7 @@ ENDM
 	;2 bit govori da li je igrac double downovao 
 	;3 bit govori da li igrac ima jedinicu u ruci
 	;4 bit govori da li je igrac dobio black jack
+	;5 bit ako je igrac pobedio rundu
 
 	OkruzenjeIgraca STRUCT
 		
@@ -147,7 +163,7 @@ ENDM
 	KoordinateSpilaKarata byte 98,0
 	
 	windowRect SMALL_RECT <xmin, ymin, xmax, ymax>      ;// Velicina prozora
-	winTitle byte "Zmijica", 0							;// Naslov programa
+	winTitle byte "BlackJack", 0							;// Naslov programa
 	cursorInfo CONSOLE_CURSOR_INFO <>					;// Informacije o kursoru
 
 
@@ -166,6 +182,7 @@ ENDM
 	Okruzenja OkruzenjeIgraca 4 dup(<?>)
 	Igraci Igrac 4 dup(<?>)
 	DugmiciTokomIgre Dugme 3 dup(<?>)
+	NajPoenaSkuplenihURundi byte ?
 
 .code
 ;// -----------------------------------------------------------------------------------------------------------
@@ -179,226 +196,6 @@ ENDM
 ;// broj komandi za obavljanje nekih jednostavnih funkcija, sto nije slucaj sa nekim
 ;// visim programskim jezikom.
 ;// -----------------------------------------------------------------------------------------------------------
-
-main PROC
-
-	invoke GetStdHandle, STD_OUTPUT_HANDLE							 ;// Postavlja handle za ispis podataka
-    mov  stdOutHandle, eax
-
-    invoke GetConsoleCursorInfo, stdOutHandle, addr cursorInfo       ;// Cita trenutno stanje kursora
-    mov  cursorInfo.bVisible, 0										 ;// Postavlja vidljivost kursora na nevidljiv
-    invoke SetConsoleCursorInfo, stdOutHandle, addr cursorInfo       ;// Postavlja novo stanje kursora
-
-	mov BrojIgraca, 4
-	mov AktivniIgrac, 2
-
-	invoke getStdHandle, STD_INPUT_HANDLE
-	mov stdInHandle, eax
-	mov ecx, 10
-	;// Cita dva dogadjaja iz bafera
-	invoke ReadConsoleInput, stdInHandle, addr temp, 1, addr bRead
-	invoke ReadConsoleInput, stdInHandle, addr temp, 1, addr bRead
-
-    call Randomize
-
-	;/////////prep values
-	
-	mov esi, offset Okruzenja
-	mov edx, offset Igraci
-
-    mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset DealerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-	mov byte ptr [esi], 40;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 0;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 0;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 40;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 5;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-    
-
-	INC esi;okruzenje 2
-	ADD edx, 22;igrac 2
-
-	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-	mov byte ptr [esi], 14;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 0;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 11;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 6;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 20;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-
-	INC esi;okruzenje 3
-	ADD edx, 22;igrac 3
-
-	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-    
-	mov byte ptr [esi], 14;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 38;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 11;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 45;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 20;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-
-	INC esi;okruzenje 4
-	ADD edx, 22;igrac 4
-
-	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-	mov byte ptr [esi], 14;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 76;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 11;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 84;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 20;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-
-	mov esi, offset DugmiciTokomIgre
-	mov[esi], offset HitButtonSprite
-	ADD esi, 4
-	mov byte ptr [esi], 2
-	INC esi
-	mov byte ptr [esi], 28
-	INC esi
-	mov byte ptr [esi], 4
-	INC esi
-	mov byte ptr [esi], 29
-	INC esi
-
-	mov[esi], offset StandButtonSprite
-	ADD esi, 4
-	mov byte ptr [esi], 15
-	INC esi
-	mov byte ptr [esi], 28
-	INC esi
-	mov byte ptr [esi], 17
-	INC esi
-	mov byte ptr [esi], 29
-	INC esi
-
-	mov[esi], offset DoublDownButtonSprite
-	ADD esi, 4
-	mov byte ptr [esi], 33
-	INC esi
-	mov byte ptr [esi], 28
-	INC esi
-	mov byte ptr [esi], 35
-	INC esi
-	mov byte ptr [esi], 29
-
-	mov SelectedButton, 1
-
-	GameLoop:;prvo se svim igracima dodeljuju pocetne karte pre nego sto igra pocne
-	mov bl, 1;bl je brojac do kog igraca je stiglo dodeljivanje karata
-	call UpdatePlayFrame
-    call DrawGamePlayNubbins
-
-	mov eax, 100
-	call delay
-
-	DodeljivanjeKarata:
-
-
-
-	OdaberiKartu;stavlja u al indeks karte
-	mov ah, 1;brza dodela karte
-	mov ebx, 1;igrac kome se daje karta
-
-	call DodajKartuIgracu
-
-	mov al, 52;naopacke okrenuta karta
-	mov ah, 3;tip animacije bez flipovanja karte
-
-	call DodajKartuIgracu
-	
-	DodajKarteIgracima:
-	INC ebx
-	OdaberiKartu
-	mov ah, 1
-	call DodajKartuIgracu
-
-	OdaberiKartu
-	mov ah, 1
-	call DodajKartuIgracu
-
-	cmp bl, BrojIgraca;prolazi kroz sve igrace i dodaje im karte
-	jl DodajKarteIgracima
-
-
-	PlayLoop:;sada igraci mogu da 
-
-
-
-
-
-    exit
-    
-
-
-main ENDP
-
-;// --------------------------------------------------------------------------------------------
-
 
 
 UpdatePlayFrame PROC USES eax esi;ne updatuje dugmice
@@ -429,26 +226,26 @@ DajAdresuFlipSprajta PROC;bl prima boju karte
 	cmp bl, 2
 	je HeartFliped
 
-	mov eax, black + (lightGray * 16)	
+	mov eax, black + (CardBackground * 16)	
     call SetTextColor
 	mov ebx, offset Cardf3
 	RET
 
 
 	DiamondFlip:
-	mov eax, red + (lightGray * 16)	
+	mov eax, red + (CardBackground * 16)	
     call SetTextColor
 	mov ebx,offset Cardf0
 	RET
 
 	ClovesFliped:
-	mov eax, black + (lightGray * 16)	
+	mov eax, black + (CardBackground * 16)	
     call SetTextColor
 	mov ebx, offset Cardf1
 	RET
 
 	HeartFliped:
-	mov eax, red + (lightGray * 16)	
+	mov eax, red + (CardBackground * 16)	
     call SetTextColor
 	mov ebx, offset Cardf2
 	RET
@@ -615,18 +412,17 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 	je SkipCheckingIfFlippedCard
 
 	cmp byte ptr[esi + 3], 52;proverava da li je poslednja karta u ruci flipovana
-	jne SkipCheckingIfFlippedCard;ako karta nije flipovana ne treba prepisati preko nje
-	DEC esi;kako bi overwriteovao flipovanu kartu umesto dodao novu
-	jmp ReadyToAddCard
+	je ReadyToAddCard;ako karta nije flipovana ne treba prepisati preko nje
 
 	SkipCheckingIfFlippedCard:
 	INC bl
 	pop esi
 	mov byte ptr [esi],bl;povecava broj karata u ruci igraca
 	push esi
+	ADD esi, ebx
 	ReadyToAddCard:
 	
-	ADD esi, ebx
+
 
 	mov byte ptr[esi + 3], 53;postavlja praznu kartu na polje
 
@@ -649,6 +445,7 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 
 	mov ah, [esi + 1];ukupan broj poena
 	ADD ah, al
+	mov [esi + 1], ah;zapisuje koliko poena ima igrac sada
 	mov bl, [esi + 3];flags
 
 	cmp al, 1
@@ -658,30 +455,7 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 	SkipSettingOneFlag:
 
 
-	cmp ah, 21
-	je GotBlackJack
-	jl CheckAces
-
-	;u slucaju da je broj poena veci od 21
-	OR bl, 1;Bust flag
-	jmp EndOfSettingFlags
-
-	CheckAces:
-	;u slucaju da igrac ima manje 
-	mov bh, bl
-	AND bh, 4;dobija se provera da li je flag istinit
-	cmp bh, 0
-	je EndOfSettingFlags
-	cmp ah, 11;ako igrac ima jedinicu u ruci i ima 11 poena, onda ta jedinica moze da se racuna kao 11 u kom slucaju igrac ima black jack
-	jne EndOfSettingFlags
-	OR bl, 8;blackjack flag true
-	jmp EndOfSettingFlags
-
-	GotBlackJack:
-	OR bl, 8;sets the black jack flag true
-
-	EndOfSettingFlags:
-	mov [esi + 3], bl
+	
 	EndOfDodajKartu:
 
 	RET
@@ -731,47 +505,77 @@ DrawGamePlayNubbins PROC USES eax ebx edx esi
 	RET
 DrawGamePlayNubbins ENDP
 
-DrawBackGround PROC USES eax ebx edx ecx
-    mov eax, brown + (Gray * 16)									 ;// Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
-    call SetTextColor  
-	mov eax, 1
-	;mov ebx, AktivniIgrac
-	mov ecx, offset Okruzenja
-	ADD ecx, 4;adresa sprajta za okruzenje
-	mov ebx, [ecx]
-	ADD ecx, 6
-	mov dx, [ecx]
-		DrawPlayerInterfaces: 
+DrawBackGround PROC USES eax ebx edx ecx esi
+	mov eax, 1;brojac igraca
+	mov esi, offset Okruzenja
+
+	DrawPlayerInterfaces: 
 
 		cmp al, AktivniIgrac
 		je PreskociCrtanjeZaSada;aktivni igrac treba poslednji da se crta
+		
+		push eax
 
+		mov eax, brown + (Gray * 16);Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
+ 	    call SetTextColor  
+
+		mov ecx, [esi];adresa igraca
+		mov bl, byte ptr [ecx + 3];flags varijabla
+		push ebx;cuva flags varijable
+		AND bl, 1
+		cmp bl, 0
+		je SkipDrawingBustedFrame
+			mov eax, brown + (black * 16)
+			call SetTextColor  
+		SkipDrawingBustedFrame:
+
+		mov ebx, [esi + 4];adresa sprajta
+		mov dx, [esi + 10];koordinate sprajta
 		call DrawSprite
-		cmp al, 1
+
+		mov ebx, [esp];vraca ebx vrednost sa stakca u kome su flags variable
+		AND bl, 16;ovaj bit cuva da li je igrac pobedio
+		cmp bl, 0
+		je SkipDrawingVictoryFrame
+			mov eax, yellow + (Gray * 16)
+			call SetTextColor  
+		SkipDrawingVictoryFrame:
+		
+		pop ebx
+		AND bl, 8;ovaj bit cuva da li je igrac dobio black jack
+		cmp bl, 0
+		je SkipDrawingBlackJackSprite
+			push edx
+			mov eax, [esi + 4];prve dve koordinate sprajta su velicina prozora x,y
+			mov dx, Word ptr[eax]
+			SHR dl, 1;deli dimenzije sa dva 
+			SHR dh, 1
+			mov eax, [esi + 10];koordinate prozora
+			ADD dl, al;postavlja koordinate na centar prozora
+			ADD dh, ah
+			SUB dl, 17;polovina black jack sprajta
+			SUB dh, 5
+			mov ebx, offset BlackJackSprite
+			call DrawSprite
+			pop edx
+		SkipDrawingBlackJackSprite:
+
+		cmp byte ptr[esp], 1;vrh stacka pokazuje do kog igraca je stiglo 
 		je SkipShiftingCursor;prvom igracu, to jest, dealeru, ne treba pomerati kursor za crtanje poena na ekran
 		INC dl;koordinate za crtanje poena
 		INC dh
 		SkipShiftingCursor:
 		call GotoXY
-		push eax
 
-		push ecx
-		SUB ecx, 10
-		mov ebx, [ecx];adresa igraca
-		INC ebx;adresa poena igraca
-		movzx eax, byte ptr [ebx]
+		movzx eax, byte ptr [ecx + 2];poeni igraca
 		call WriteDec
-		pop ecx
+	
+
 		pop eax
 		PreskociCrtanjeZaSada:
 		
-
 		INC eax
-
-		ADD ecx, 8
-		mov ebx, [ecx]
-		ADD ecx, 6
-		mov dx, [ecx]
+		ADD esi, 14;velicina strukture
 		cmp al, BrojIgraca
 		jle DrawPlayerInterfaces
 
@@ -787,16 +591,14 @@ DrawBackGround PROC USES eax ebx edx ecx
 	DEC eax
 	mov cl, 14;velicina okruzenja
 	MUL cl
-	mov ecx, offset Okruzenja
-	ADD ecx, eax;skace na adresu aktivnog korisnika
-	ADD ecx, 4;adresa sprajta za okruzenje
-	mov ebx, [ecx]
-	ADD ecx, 6
-	mov dx, [ecx]
+	mov esi, offset Okruzenja
+	ADD esi, eax;skace na adresu aktivnog korisnika
+	mov ebx, [esi + 4]
+	mov dx, [esi + 10]
 
 
 	call DrawSprite
-	cmp eax, 1;ovo je pozicija dealera
+	cmp eax, 0;ovo je pozicija dealera
 	je SkipShiftingCursorActive;prvom igracu, to jest, dealeru, ne treba pomerati kursor za crtanje poena na ekran
 	INC dl;koordinate za crtanje poena
 	INC dh
@@ -804,10 +606,8 @@ DrawBackGround PROC USES eax ebx edx ecx
 	SkipShiftingCursorActive:
 
 	call GotoXY
-	SUB ecx, 10
-	mov ebx, [ecx];adresa igraca
-	INC ebx;adresa poena igraca
-	movzx eax, byte ptr [ebx]
+	mov ecx, [esi];adresa igraca
+	movzx eax, byte ptr [ecx + 2]
 	call WriteDec
 
 
@@ -961,28 +761,28 @@ DrawCard PROC USES eax edx ebx ;eax temp, edx possisiton, bl indeks karte
     ;ne treba poredjenje za poslednji jer je sigurno taj
 
 
-    mov eax, black + (lightGray * 16)
+    mov eax, black + (CardBackground * 16)
     call SetTextColor      
     mov ebx, offset Card3 
     call DrawSprite
     jmp FinishDrawingCardFrame
 
     Diamond:
-    mov eax, red + (lightGray * 16)
+    mov eax, red + (CardBackground * 16)
     call SetTextColor      
     mov ebx, offset Card0 
     call DrawSprite
     jmp FinishDrawingCardFrame
 
     RoundLeafThing:
-    mov eax, black + (lightGray * 16)
+    mov eax, black + (CardBackground * 16)
     call SetTextColor      
     mov ebx, offset Card1 
     call DrawSprite
     jmp FinishDrawingCardFrame
 
     Heart:
-    mov eax, red + (lightGray * 16)
+    mov eax, red + (CardBackground * 16)
     call SetTextColor      
     mov ebx, offset Card2 
     call DrawSprite
@@ -1060,4 +860,551 @@ DrawSprite PROC USES eax edx ebx ;eax temp, edx are the coordinates where to dra
     RET
 DrawSprite ENDP
 
+
+main PROC
+
+	invoke GetStdHandle, STD_OUTPUT_HANDLE							 ;// Postavlja handle za ispis podataka
+    mov  stdOutHandle, eax
+
+    invoke GetConsoleCursorInfo, stdOutHandle, addr cursorInfo       ;// Cita trenutno stanje kursora
+    mov  cursorInfo.bVisible, 0										 ;// Postavlja vidljivost kursora na nevidljiv
+    invoke SetConsoleCursorInfo, stdOutHandle, addr cursorInfo       ;// Postavlja novo stanje kursora
+
+	invoke SetConsoleTitle, addr winTitle							 ;// Postavlja title prozora
+    invoke SetConsoleWindowInfo, stdOutHandle, TRUE, addr windowRect ;// Dimenzije prozora
+
+	mov BrojIgraca, 4
+	mov AktivniIgrac, 2
+
+	invoke getStdHandle, STD_INPUT_HANDLE
+	mov stdInHandle, eax
+	mov ecx, 10
+	;// Cita dva dogadjaja iz bafera
+	;invoke ReadConsoleInput, stdInHandle, addr temp, 1, addr bRead
+	;invoke ReadConsoleInput, stdInHandle, addr temp, 1, addr bRead
+
+    call Randomize
+
+	;/////////prep values
+	
+	mov esi, offset Okruzenja
+	mov edx, offset Igraci
+
+    mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+	ADD esi, 4
+	mov [esi], offset DealerInterface;pointer ka sprajtu interfacea
+	ADD esi, 4
+	mov byte ptr [esi], 40;okvir u kome se dele karte
+	INC esi
+	mov byte ptr [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	INC esi
+	mov byte ptr [esi], 0;gde se crta prozor x
+	INC esi
+	mov byte ptr [esi], 0;gde se crta prozor y
+	INC esi
+	mov byte ptr [esi], 40;centar odakle se crtaju karte x
+	INC esi
+	mov byte ptr [esi], 5;centar odakle se crtaju karte y
+
+	mov byte ptr [edx], 0;broj karata
+	INC edx
+	mov byte ptr [edx], 0;broj peona
+	INC edx
+	mov byte ptr [edx], 0;broj pobeda
+	INC edx
+	mov byte ptr [edx], 0;flags
+    
+
+	INC esi;okruzenje 2
+	ADD edx, 22;igrac 2
+
+	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+	ADD esi, 4
+	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
+	ADD esi, 4
+	mov byte ptr [esi], 14;okvir u kome se dele karte
+	INC esi
+	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	INC esi
+	mov byte ptr [esi], 0;gde se crta prozor x
+	INC esi
+	mov byte ptr [esi], 11;gde se crta prozor y
+	INC esi
+	mov byte ptr [esi], 6;centar odakle se crtaju karte x
+	INC esi
+	mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+	mov byte ptr [edx], 0;broj karata
+	INC edx
+	mov byte ptr [edx], 0;broj peona
+	INC edx
+	mov byte ptr [edx], 0;broj pobeda
+	INC edx
+	mov byte ptr [edx], 0;flags
+
+	INC esi;okruzenje 3
+	ADD edx, 22;igrac 3
+
+	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+	ADD esi, 4
+	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
+	ADD esi, 4
+    
+	mov byte ptr [esi], 14;okvir u kome se dele karte
+	INC esi
+	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	INC esi
+	mov byte ptr [esi], 38;gde se crta prozor x
+	INC esi
+	mov byte ptr [esi], 11;gde se crta prozor y
+	INC esi
+	mov byte ptr [esi], 45;centar odakle se crtaju karte x
+	INC esi
+	mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+	mov byte ptr [edx], 0;broj karata
+	INC edx
+	mov byte ptr [edx], 0;broj peona
+	INC edx
+	mov byte ptr [edx], 0;broj pobeda
+	INC edx
+	mov byte ptr [edx], 0;flags
+
+	INC esi;okruzenje 4
+	ADD edx, 22;igrac 4
+
+	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+	ADD esi, 4
+	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
+	ADD esi, 4
+	mov byte ptr [esi], 14;okvir u kome se dele karte
+	INC esi
+	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	INC esi
+	mov byte ptr [esi], 76;gde se crta prozor x
+	INC esi
+	mov byte ptr [esi], 11;gde se crta prozor y
+	INC esi
+	mov byte ptr [esi], 84;centar odakle se crtaju karte x
+	INC esi
+	mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+	mov byte ptr [edx], 0;broj karata
+	INC edx
+	mov byte ptr [edx], 0;broj peona
+	INC edx
+	mov byte ptr [edx], 0;broj pobeda
+	INC edx
+	mov byte ptr [edx], 0;flags
+
+	mov esi, offset DugmiciTokomIgre
+	mov[esi], offset HitButtonSprite
+	ADD esi, 4
+	mov byte ptr [esi], 2
+	INC esi
+	mov byte ptr [esi], 28
+	INC esi
+	mov byte ptr [esi], 4
+	INC esi
+	mov byte ptr [esi], 29
+	INC esi
+
+	mov[esi], offset StandButtonSprite
+	ADD esi, 4
+	mov byte ptr [esi], 16
+	INC esi
+	mov byte ptr [esi], 28
+	INC esi
+	mov byte ptr [esi], 18
+	INC esi
+	mov byte ptr [esi], 29
+	INC esi
+
+	mov[esi], offset DoublDownButtonSprite
+	ADD esi, 4
+	mov byte ptr [esi], 34
+	INC esi
+	mov byte ptr [esi], 28
+	INC esi
+	mov byte ptr [esi], 36
+	INC esi
+	mov byte ptr [esi], 29
+
+
+
+	GameLoop:;prvo se svim igracima dodeljuju pocetne karte pre nego sto igra pocne
+		mov SelectedButton, 0
+		mov AktivniIgrac, 0;nijedan igrac nije aktivan na pocetku
+		call UpdatePlayFrame
+		call DrawGamePlayNubbins
+
+		mov eax, 500
+		call delay
+		mov NajPoenaSkuplenihURundi, 0
+
+		OdaberiKartu;stavlja u al indeks karte
+		mov ah, 1;brza dodela karte
+		mov ebx, 1;igrac kome se daje karta
+
+		call DodajKartuIgracu
+
+		mov al, 52;naopacke okrenuta karta
+		mov ah, 3;tip animacije bez flipovanja karte
+
+		call DodajKartuIgracu
+		
+		mov esi, offset Igraci
+		
+		DodajKarteIgracima:
+			INC ebx
+			ADD esi, 25;velicina igrac struct
+			OdaberiKartu
+			mov ah, 1
+			call DodajKartuIgracu
+
+			OdaberiKartu
+			mov ah, 1
+			call DodajKartuIgracu
+
+
+			mov ah, [esi + 1];poeni u ovoj rundi
+
+			cmp ah, 11
+			jne DodeliKarteSledecem
+			mov al, [esi + 3];flags
+			AND al, 4;da li ima jedinicu u ruci
+			cmp al, 0
+			je DodeliKarteSledecem
+
+			mov al, [esi + 3]
+			OR al, 8
+			mov [esi + 3], al;cuva da je igrac dobio natural blackjack
+			DodeliKarteSledecem:
+		
+		cmp bl, BrojIgraca;prolazi kroz sve igrace i dodaje im karte
+		jl DodajKarteIgracima
+
+		mov AktivniIgrac, 1
+		mov SelectedButton, 1
+
+		mov esi, offset Igraci
+		jmp PromeniIgraca;ovako se inicijalizuju neophodne stvari za prvog pravog igraca kao i svakog narednog
+		
+		PlayLoop:;sada igraci mogu da 
+
+
+			invoke ReadConsoleInput, stdInHandle, addr temp,1,addr bRead
+			mov bx, word ptr temp
+			cmp bx, 1;proverava da li event dolazi sa tastature
+			jne PlayLoop
+
+			mov bl, byte ptr [temp + 4]
+			cmp bl, 0
+			je PlayLoop;nema razloga reagovati na event odpustanja dugmeta
+				mov bl, byte PTR [temp + 10]
+
+				cmp bl, LEFT_KEY
+				je DecrementSelectedButton
+
+				cmp bl, RIGHT_KEY
+				je IncrementSelectedButton
+
+				cmp bl, UP_KEY
+				je HandleGameplayButton
+
+		jmp PlayLoop
+
+		DecrementSelectedButton:
+		mov bl, SelectedButton
+		cmp bl, 1
+		je SetGameplayButtonTop
+		DEC bl
+		mov SelectedButton, bl
+		call DrawGamePlayNubbins
+		jmp PlayLoop
+		SetGameplayButtonTop:
+		mov SelectedButton, 3
+		call DrawGamePlayNubbins
+		jmp PlayLoop
+
+		IncrementSelectedButton:
+		mov bl, SelectedButton
+		cmp bl, 3
+		je SetGameplayButtonBottom
+		INC bl
+		mov SelectedButton, bl
+		call DrawGamePlayNubbins
+		jmp PlayLoop
+		SetGameplayButtonBottom:
+		mov SelectedButton, 1
+		call DrawGamePlayNubbins
+		jmp PlayLoop
+
+		HandleGameplayButton:
+		mov bl, SelectedButton
+		cmp bl, 1
+		je HandleHitButton
+		cmp bl, 2
+		je HandleStandButton
+		jmp HandleDoubleDownButton
+
+		HandleHitButton:
+
+			movzx ebx, AktivniIgrac
+			OdaberiKartu
+			mov ah, 2;sporiji tip animacije
+
+			call DodajKartuIgracu;dodaje kartu aktivnom igracu
+
+			mov al, byte ptr[esi + 1];ucitava broj poena
+
+			cmp al, 21
+			je IgracJeDobioBlackJack
+			cmp al, 21
+			jg IgracJeBustovao
+
+			mov ah, byte ptr[esi + 3];ucitava flags varijablu
+			AND ah, 4; treci bit cuva da li igrac ima jedinicu u ruci
+			cmp ah, 0;     ako nema
+			je PlayLoop;moze da igra ponovo jer nije bustovao niti dobio blackjack
+
+			cmp al, 11;ako igrac ima jedinicu u ruci ta jedinica moze da se racuna kao 21 i ako ima 11 poena onda ima blackjack
+			jne PlayLoop;ako nema blackjack moze da igra ponovo
+
+			mov byte ptr[esi + 1], 21;postavlja 21 na broj poena pre nego sto menja igraca
+			jmp IgracJeDobioBlackJack
+
+		HandleStandButton:
+
+			mov al, byte ptr[esi + 1];ucitava broj poena
+
+			cmp al, 11
+			jg PromeniIgraca;ako ima vise od 11 onda iako ima 1 nece biti od koristi da se racuna kao 11
+
+			mov ah, byte ptr[esi + 3];ucitava flags varijablu
+			AND ah, 4; treci bit cuva da li igrac ima jedinicu u ruci
+			cmp ah, 0;          ako nema
+			je PromeniIgraca;moze samo da se promeni igrac
+
+			ADD al, 10
+			mov byte ptr[esi + 1], al;upisuje broj poena sa 1 racunatom kao 11
+			jmp PromeniIgraca
+
+		HandleDoubleDownButton:
+
+			movzx ebx, AktivniIgrac
+			OdaberiKartu
+			mov ah, 2;sporiji tip animacije
+
+			call DodajKartuIgracu;dodaje kartu aktivnom igracu
+
+			mov al, byte ptr[esi + 1];ucitava broj poena
+			mov ah, byte ptr[esi + 3];ucitava flags varijablu
+			OR ah, 2;podesava flag za double down
+			mov byte ptr[esi + 3], ah;sacuva flag
+
+
+			cmp al, 21
+			je IgracJeDobioBlackJack
+			cmp al, 21
+			jg IgracJeBustovao
+			
+			cmp al, 11
+			jg PromeniIgraca;ako ima vise od 11 onda iako ima 1 nece biti od koristi da se racuna kao 11
+
+			AND ah, 4; treci bit cuva da li igrac ima jedinicu u ruci
+			cmp ah, 0;          ako nema
+			je PromeniIgraca;moze samo da se promeni igrac
+
+			ADD al, 10
+			mov byte ptr[esi + 1], al;upisuje broj poena sa 1 racunatom kao 11
+			cmp al, 21
+			je IgracJeDobioBlackJack
+			jmp PromeniIgraca
+
+		IgracJeBustovao:
+			mov ah, byte ptr[esi + 3];ucitava flags varijablu
+			OR ah, 1;namesta bust flag
+			mov byte ptr[esi + 3], ah;cuva flags varijablu
+			mov byte ptr[esi + 1], 0
+		jmp PromeniIgraca
+
+		IgracJeDobioBlackJack:
+			mov ah, byte ptr[esi + 3];ucitava flags varijablu
+			OR ah, 8;namesta bust flag
+			mov byte ptr[esi + 3], ah;cuva flags varijablu
+		jmp PromeniIgraca
+
+		PromeniIgraca:
+			mov cl, NajPoenaSkuplenihURundi
+			cmp cl, byte ptr[esi + 1];proverava da li je ovaj igrac imao najvise poena
+			jg PreskociPromenuPoena
+			mov cl, byte ptr[esi + 1]
+			mov NajPoenaSkuplenihURundi, cl
+			PreskociPromenuPoena:
+
+
+			mov al, AktivniIgrac
+			INC al
+			cmp al, BrojIgraca
+			jg DealerovPotez
+
+			mov SelectedButton, 1
+			mov AktivniIgrac, al
+
+			call UpdatePlayFrame
+			call DrawGamePlayNubbins
+			ADD esi, 25; velicina igrac struct
+
+			mov al, byte ptr[esi + 3];flags
+			AND al, 8;natural blackjack
+			cmp al, 0 
+			je PlayLoop
+
+			mov byte ptr[esi + 1], 22
+
+		jmp PromeniIgraca
+
+		DealerovPotez:
+			mov AktivniIgrac, 1
+			mov SelectedButton, 0
+			call UpdatePlayFrame
+			call DrawGamePlayNubbins
+
+			mov ebx, 1
+			OdaberiKartu
+			mov ah, 4;flipuje obrnutu kartu
+
+			call DodajKartuIgracu
+
+			mov esi, offset Igraci;dealer je uvek prvi igrac
+			mov al, byte ptr[esi + 1];ucitava broj poena
+			mov ah, byte ptr[esi + 3]
+
+			AND ah, 4
+			cmp ah, 0
+			je DealerPlayLoop
+			
+			cmp al, 11
+			jne DealerPlayLoop
+
+			mov byte ptr[esi + 1], 22
+			mov ah, byte ptr[esi + 3]
+			OR ah, 8
+			mov byte ptr[esi + 3], ah
+		jmp ZavrsiRundu
+
+		DealerPlayLoop:
+
+			cmp al, NajPoenaSkuplenihURundi
+			jg ZavrsiRundu
+
+			cmp al, 21;ako je dobio black jack a neko ima isto toliko poena, svakako ne moze da pobedi
+			je DealerDobioBlackJack
+
+			mov ebx, 1
+			OdaberiKartu
+			mov ah, 2
+
+			call DodajKartuIgracu
+
+			mov al, byte ptr[esi + 1];ucitava broj poena
+
+
+			cmp al, 21
+			jg DealerBusted
+
+			mov ah, byte ptr[esi + 3]
+			AND ah, 4
+			cmp ah, 0
+			je DealerPlayLoop
+
+			cmp al, 11
+			jg DealerPlayLoop
+
+			ADD al, 10
+			jmp DealerPlayLoop
+
+		DealerBusted:
+			mov al, 0
+			mov ah, byte ptr[esi + 3]
+			OR ah, 1
+			mov byte ptr[esi + 3], ah
+		jmp ZavrsiRundu
+
+		
+		DealerDobioBlackJack:
+			mov ah, byte ptr[esi + 3];ucitava flags varijablu
+			OR ah, 8;namesta bust flag
+			mov byte ptr[esi + 3], ah;cuva flags varijablu
+		jmp ZavrsiRundu
+
+		ZavrsiRundu:
+
+		;mov byte ptr [esi + 1], al; zapisuje dealerove poene
+		mov bl, 2;brojac za prvog igraca
+		mov ah, NajPoenaSkuplenihURundi
+		cmp al, ah
+		jle DodajPoeneIgracima
+
+		mov ah, byte ptr[esi + 3]
+		OR ah, 16;bit za pobedu
+		mov byte ptr[esi + 3], ah
+		mov ah, byte ptr[esi + 2]
+		INC ah
+		mov byte ptr[esi + 2], ah;povecava broj pobeda
+
+		DodajPoeneIgracima:
+			
+			ADD esi, 25;velicina igraci struct
+
+			mov al, byte ptr [esi + 1];broj poena
+			cmp al, ah
+			jne IgracNijePobedio
+
+			mov al, byte ptr [esi + 2];koliko pobeda ima igrac
+			mov cl, byte ptr [esi + 3];flags
+			mov ch, cl
+			AND cl, 2;da li je igrac double downovao
+			cmp cl, 0;ako nije double downovao
+			je NijeDoubleDownovao;povecaj broj poena jedanput
+			INC al
+			NijeDoubleDownovao:
+			INC al
+			mov byte ptr [esi + 2], al;upisuje broj pobeda
+
+			OR ch, 16;zapisuje da je igrac pobedio
+			mov byte ptr [esi + 3], ch
+
+			IgracNijePobedio:
+
+			INC bl;brojac igraca
+			cmp bl, BrojIgraca
+		jle DodajPoeneIgracima;ako ima jos igraca
+
+		mov AktivniIgrac, 0
+		call UpdatePlayFrame
+		mov eax, 3000
+		call delay
+
+		mov bl, BrojIgraca
+		mov esi, offset Igraci
+		OcistiVarijableZaNovuRundu:
+
+			mov byte ptr[esi], 0;broj karata u ruci
+			mov byte ptr[esi + 1], 0;broj poena 
+			mov byte ptr[esi + 3], 0;flags
+
+			ADD esi, 25
+			DEC bl
+			cmp bl, 0
+		jne OcistiVarijableZaNovuRundu
+
+		jmp GameLoop
+
+    exit
+    
+
+
+main ENDP
 END main
