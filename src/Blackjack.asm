@@ -34,9 +34,9 @@ CardBackground = Gray
 .const
 	;// Definisanje velicine prozora 
 	xmin = 0	;// leva ivica
-	xmax = 118	;// desna ivica
+	xmax = 115	;// desna ivica
 	ymin = 0	;// gornja ivica
-	ymax = 32	;// donja ivica
+	ymax = 31	;// donja ivica
 
 	;// Oznake za levo, desno, gore, dole, ESC, ASCII
 	LEFT_KEY = 025h        
@@ -52,10 +52,131 @@ CardBackground = Gray
 
 
 .data
-	;// Stringovi za ispis WELCOME screena i izbor brzine zmijice
+  
+TitleScreenSprite byte 116,29,"	            ______   __                 __           _____              __                                        ",0         
+                  byte        "                   |_   _ \ [  |               [  |  _      |_   _|            [  |  _             ______          ",0     
+                  byte        "            ______   | |_) | | |  ,--.   .---.  | | / ]       | | ,--.   .---.  | | / ]           /  __  \         ",0           
+                  byte        "      _____/  __  \  |  __'. | | `'_\ : / /'`\] | '' <    _   | |`'_\ : / /'`\] | '' <     ______|  |__|  ______   ",0         
+                  byte        "     /  __  \ __|   _| |__) || | // | |,| \__.  | |`\ \  | |__' |// | |,| \__.  | |`\ \   /  __  \ _____ /  __  \  ",0           
+                  byte        "    |  |__|  |____/|_______/[___]\'-;__/'.___.'[__|  \_] `.____.'\'-;__/'.___.'[__|  \_] |  |__|  | ____|  |__|  | ",0          
+                  byte        "    |\______/|____/                                                                      |\______/| ____|\______/| ",0             
+                  byte        "    |\______/|                                                                           |\______/|     |\______/| ",0         
+                  byte        "    |\______/|                                                          ______           |\___  ______  |\______/| ",0        
+                  byte        "     \ ____ /                                                          /  __  \           \ __ /  __  \  \ ____ /  ",0          
+                  byte        "                                                                      |  |__|  |              |  |__|  |           ",0         
+                  byte        "                                                                      |\______/|              |\______/|           ",0        
+                  byte        "                                                                      |\______/|               \______/            ",0       
+                  byte        "                                                                      |\______/|                                   ",0
+                  byte        "------                                                                 \ ____ /                              ------",0
+                  byte        "      ----------------                                                                       ----------------      ",0
+                  byte        "                      -----------------------------------------------------------------------                      ",0
+                  byte        "                     .                                                                       .                     ",0
+                  byte        "                    .                                                                         .                    ",0
+                  byte        "                   .                                                                           .                   ",0
+                  byte        "                  .                                                                             .                  ",0
+                  byte        "                 .                                                                               .                 ",0
+                  byte        "                .                                                                                 .                ",0
+                  byte        "               .                                ---------------                                    .               ",0
+                  byte        "              .                                 |   S T A R T |                                     .              ",0
+                  byte        "             .                                  ---------------                                      .             ",0
+                  byte        "            .                                                                                         .            ",0
+                  byte        "           .                                                                                           .           ",0
+                  byte        "          .                                                                                             .          ",0
+
+
+DealerVictorySprite byte 101,26,  "                                           ____                                                     ", 0
+                    byte          "                                   /---\..'     `-_                                                 ", 0
+                    byte          "                                 /      .|`         \__                                             ", 0
+                    byte          "                                /         |/            \                                           ", 0
+                    byte          "              _____________   '          v    _    '    \                                           ", 0
+                    byte          "              |           |  /      /^ \      /  \   \   \                                          ", 0
+                    byte          "              |           | |       |_ _  _   _'''\    \  \                                         ", 0
+                    byte          "              |           |  \      : :; ; \ : ;: ;-____/ |                                         ", 0
+                    byte          "              |           |   /     | ` `` `  ```___- \_ _|                                         ", 0
+                    byte          "             /|  /\       |  <     /-__---\   /`_----/ |/ \                                         ", 0
+                    byte          "            /.//-'/       |   \ /\ --`__`` \ |  ````' /|  |                                         ", 0
+                    byte          "          /  /   /        |     | \'\---`` ' '  `````|/| />                                         ", 0
+                    byte          "         /  /   /.-''^-   |__    \_\\   .   \_/  _/^\|/|\  >                                        ", 0
+                    byte          "         | \   \|```_`'--\|   `- <  \\ / \>__  __\_  |_|\ /                                         ", 0
+                    byte          "         \  \   |  |` ._;_| .. -``-.'\ \|  |------  .| |/  \ \_                                     ", 0
+                    byte          "          \  |  |  |  |.            \|\\ \`v ``  ` ///   /  \ \                                     ", 0
+                    byte          "         __\ |  |   .               /\  \ `  <     /   /    /    \---\_                             ", 0
+                    byte          "       /``    ---\_/\_\____________/  \'   \____ /   _/    /            \__                         ", 0
+                    byte          "    /`       |           /            |  `-.__  __-'      /                 \_                      ", 0
+                    byte          "   /         /           \             |.   / \ / \       /                    \______              ", 0
+                    byte          " /          |            ||           _; \ /   V   \     /|                         ___----_        ", 0
+                    byte          "|           |           / |.^--..  .--`   \         \  /  |                   _--```         `_     ", 0
+                    byte          ":           |          /                   >         V    |               _-``                 `-_  ", 0
+                    byte          "|           \         /                    |              |            _-`                       `\ ", 0
+                    byte          "|            \        <                    |             /            /                            \", 0
+                    byte          "|             \         \                  |           /             /                             |", 0
+
+
+PobedioJeSprite byte 76, 6," _______         __                     __   _                _            ",0
+                byte       "|_   __ \       [  |                   |  ] (_)              (_)        _  ",0
+                byte       "  | |__) | .--.  | |.--.   .---.   .--.| |  __   .--.        __  .---. (_) ",0
+                byte       "  |  ___// .'`\ \| '/'`\ \/ /__\\/ /'`\' | [  |/ .'`\ \     [  |/ /__\\ _  ",0
+                byte       " _| |_   | \__. ||  \__/ || \__.,| \__/  |  | || \__. |   _  | || \__.,(_) ",0
+                byte       "|_____|   '.__.'[__;.__.'  '.__.' '.__.;__][___]'.__.'   [ \_| | '.__.'    ",0
+
+
+
+DealerTextSprite byte 66,6," ______   ________       _       _____     ________  _______     ",0
+                 byte      "|_   _ `.|_   __  |     / \     |_   _|   |_   __  ||_   __ \    ",0
+                 byte      "  | | `. \ | |_ \_|    / _ \      | |       | |_ \_|  | |__) |   ",0
+                 byte      "  | |  | | |  _| _    / ___ \     | |   _   |  _| _   |  __ /    ",0
+                 byte      " _| |_.' /_| |__/ | _/ /   \ \_  _| |__/ | _| |__/ | _| |  \ \_  ",0
+                 byte      "|______.'|________||____| |____||________||________||____| |___| ",0
+
+
+Igrac1Sprite byte 29,4, " ___ ___ ___    _   ___   _ ",0
+             byte       "|_ _/ __| _ \  /_\ / __| / |",0
+             byte       " | | (_ |   / / _ \ (__  | |",0
+             byte       "|___\___|_|_\/_/ \_\___| |_|",0
+
+Igrac2Sprite byte 31,4, " ___ ___ ___    _   ___   ___ ",0
+             byte       "|_ _/ __| _ \  /_\ / __| |_  )",0
+             byte       " | | (_ |   / / _ \ (__   / / ",0
+             byte       "|___\___|_|_\/_/ \_\___| /___|",0
+
+Igrac3Sprite byte 31,4, " ___ ___ ___    _   ___   ____",0
+             byte       "|_ _/ __| _ \  /_\ / __| |__ /",0
+             byte       " | | (_ |   / / _ \ (__   |_ \",0
+             byte       "|___\___|_|_\/_/ \_\___| |___/",0
+
+                             
+
+
+IgracSprite byte 64,21, "                        _____             _________________    ",0
+            byte        "                       /      -------_____|               |    ",0
+            byte        "                      |                   |               |    ",0
+            byte        "                      |                   |               |    ",0
+            byte        "                      |                   |       /- \    |\   ",0
+            byte        "                      |                   |   /- \    |   ||   ",0
+            byte        "              _  __ /                     |   |   |   |   ||-__",0
+            byte        "            /\__\-__                      |   |   |   |   |__--",0
+            byte        "           /  /  __\___            _______|   |      |    |    ",0
+            byte        "    __-_-_/  / /  /   |  --------         |   |  |   |    |    ",0
+            byte        "  /  /  |  \` /  /     \                  |- |   |   |    |    ",0
+            byte        "_ |  |  |  |    /      /         `- __ -  |__|   |   |____|    ",0
+            byte        "\ \ _________+/       |                     /   /   |/--\  __  ",0
+            byte        "  -           -       |                    |-  | - |  -   `  `.",0
+            byte        ".              \      |                    |                  |",0
+            byte        "`             |        |                   \                  |",0
+            byte        "             |          |                    |               ` ",0
+            byte        "            `            |                  / \_           _/  ",0
+            byte        "           |              |`                \   -- ______-- \  ",0
+            byte        "          |               \                 \              /   ",0
+            byte        "         /                 ``---            |              \   ",0
+
+
+
+
     GameplayButtonBackground byte 116, 3,"                                                                                                                   ",0
                      		         byte"                                                                                                                   ",0
                          		     byte"                                                                                                                   ",0
+
+	PraznaMesta byte "                                                                                                                   ",0
 
 
 	DealerInterface byte 116, 12,"   |                                                                                                ____________   ",0
@@ -90,6 +211,44 @@ CardBackground = Gray
 								 byte"|                                     |",0
 								 byte"|                                     |",0
 								 byte".......................................",0
+
+								 
+	OnePlayerInterface byte 116, 17,  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",0
+								 byte"|   |                                                                                                             |",0
+							   	 byte"|----                                                                                                             |",0
+							  	 byte"|                                                                                                                 |",0
+							 	 byte"|                                                                                                                 |",0
+								 byte"|                                                                                                                 |",0
+								 byte"|                                                                                                                 |",0
+								 byte"|                                                                                                                 |",0
+								 byte"|                                                                                                                 |",0
+								 byte"|                                                                                                                 |",0
+							  	 byte"|                                                                                                                 |",0
+							 	 byte"|                                                                                                                 |",0
+							 	 byte"|                                                                                                                 |",0
+							 	 byte"|                                                                                                                 |",0
+                          		 byte"|                                                                                                                 |",0
+                           		 byte"|                                                                                                                 |",0
+                            	 byte"...................................................................................................................",0
+
+
+	TwoPlayerInterface byte 59, 17,  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",0
+								 byte"|   |                                                    |",0
+							   	 byte"|----                                                    |",0
+							  	 byte"|                                                        |",0
+							 	 byte"|                                                        |",0
+								 byte"|                                                        |",0
+								 byte"|                                                        |",0
+								 byte"|                                                        |",0
+								 byte"|                                                        |",0
+								 byte"|                                                        |",0
+							  	 byte"|                                                        |",0
+							 	 byte"|                                                        |",0
+							 	 byte"|                                                        |",0
+							 	 byte"|                                                        |",0
+								 byte"|                                                        |",0
+								 byte"|                                                        |",0
+								 byte"..........................................................",0
 	
     CardLookUpTable byte "123456789xJQK"
     CardLookUPNumber10 byte "10",0
@@ -109,6 +268,12 @@ CardBackground = Gray
     HitButtonSprite byte 13,3, "------------",0,"|   H I T  |",0,"------------",0
     StandButtonSprite byte 17,3,"----------------",0, "|   S T A N D  |", 0,"----------------",0
     DoublDownButtonSprite byte 29,3,"----------------------------",0, "|   D O U B L E   D O W N  |", 0,"----------------------------",0
+
+	StartButtonSprite byte 17,3,"----------------",0, "|   S T A R T  |", 0,"----------------",0
+
+	JedanIgracButtonSprite byte 11,1,"   1 Igrac",0
+	DvaIgracaButtonSprite byte 12,1,"   2 Igraca",0
+	TriIgracaButtonSprite byte 12,1,"   3 Igraca",0
 
 	BlackJackSprite byte 34,10,"     _--------_            /----|", 0
 					byte	   "   /   _____   \          /     |", 0
@@ -138,14 +303,12 @@ CardBackground = Gray
 	;5 bit ako je igrac pobedio rundu
 
 	OkruzenjeIgraca STRUCT
-		
 		IgracUOkruzenju DWORD 0
 		SpriteZaOkruzenje DWORD 0
 		VelicinaProzora BYTE 0
 		KolikoKarataUJednomRedu BYTE 0
 		KoordinateProzora BYTE 0,0
 		KoordinateCentraZaCrtanjeKarata BYTE 0,0
-
 	OkruzenjeIgraca ENDS
 
 	Dugme STRUCT
@@ -154,19 +317,18 @@ CardBackground = Gray
 		KoordinateKursora BYTE 0,0
 	Dugme ENDS
 
-
     SelectedButton byte 0
 
     AktivniIgrac byte 0
 
 	KoordinatePraznogPolja byte 0,0
-	KoordinateSpilaKarata byte 98,0
+	KoordinateSpilaKarata byte 99,0
 	
 	windowRect SMALL_RECT <xmin, ymin, xmax, ymax>      ;// Velicina prozora
 	winTitle byte "BlackJack", 0							;// Naslov programa
 	cursorInfo CONSOLE_CURSOR_INFO <>					;// Informacije o kursoru
 
-
+	
 
 .data?
 	;// Promenljive koje su potrebne za hendlovanje podataka unetih u konzolu tj. interakciju sa korisnikom
@@ -182,20 +344,12 @@ CardBackground = Gray
 	Okruzenja OkruzenjeIgraca 4 dup(<?>)
 	Igraci Igrac 4 dup(<?>)
 	DugmiciTokomIgre Dugme 3 dup(<?>)
+	DugmiciOdabiranjaKaraktera Dugme 3 dup(<?>)
+	StartDugme Dugme <?>
 	NajPoenaSkuplenihURundi byte ?
+	SprajtoviIgraca DWORD 3 dup(?)
 
 .code
-;// -----------------------------------------------------------------------------------------------------------
-;// main procedura koja postavlja WELCOME screen, hendluje izbor brzine zmijice
-;// i prosledjuje podprocedurama inicijalizaciju ekrana za pocetak igre, postavljanje
-;// pocetne zmijice na sredinu ekrana, generisanje hrane na nasumicnom mestu i poziva
-;// najvazniju proceduru startGame koja prati komande koje zadaje korisnik i kontrolise
-;// kretanje zmijice.
-;// Zbog pozivanja silnih procedura koje svaka za sebe obavljaju deo posla, interfejs
-;// u main proceduri je prilicno jednostavan, na stranu to sto je potreban veliki
-;// broj komandi za obavljanje nekih jednostavnih funkcija, sto nije slucaj sa nekim
-;// visim programskim jezikom.
-;// -----------------------------------------------------------------------------------------------------------
 
 
 UpdatePlayFrame PROC USES eax esi;ne updatuje dugmice
@@ -231,7 +385,6 @@ DajAdresuFlipSprajta PROC;bl prima boju karte
 	mov ebx, offset Cardf3
 	RET
 
-
 	DiamondFlip:
 	mov eax, red + (CardBackground * 16)	
     call SetTextColor
@@ -263,15 +416,12 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx;al govori indeks karte, ah govori 
 	cmp ah, 4
 	je CetvrtiTipAnimacije
 
-	
-
 	mov dx, [offset KoordinateSpilaKarata]
 	mov cx, [offset KoordinatePraznogPolja]
 	SUB cl, dl
 	SUB ch, dh;dobija se pomeraj od spila do praznog polja
 	SAR cl,2;deli sa 4
 	SAR ch,2;deli sa 4
-
 	
 	cmp ah, 1
 	je PrviTipAnimacije
@@ -292,7 +442,6 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx;al govori indeks karte, ah govori 
 	push eax
 	mov eax, 300
 	call delay
-	
 
 	call UpdatePlayFrame
 	ADD dl, cl
@@ -311,7 +460,6 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx;al govori indeks karte, ah govori 
 	call delay
 	jmp KrajAnimacije
 
-
 	DrugiTipAnimacije:;karta se prvo okrene pa ide
 	mov ebx, offset Cardf4
 	call DrawSprite
@@ -319,7 +467,6 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx;al govori indeks karte, ah govori 
 	push eax
 	mov eax, 300
 	call delay 
-	
 
 	call UpdatePlayFrame
 	call DajAdresuFlipSprajta
@@ -404,8 +551,6 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 	movzx ebx, byte ptr[esi];koliko karata igrac ima u ruci
 	push esi
 
-
-
 	ADD esi, ebx
 
 	cmp bl, 0
@@ -422,8 +567,6 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 	ADD esi, ebx
 	ReadyToAddCard:
 	
-
-
 	mov byte ptr[esi + 3], 53;postavlja praznu kartu na polje
 
 	call PustiAnimacijuKarte
@@ -461,7 +604,48 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 	RET
 DodajKartuIgracu ENDP
 
-DrawGamePlayNubbins PROC USES eax ebx edx esi
+DrawNubbins PROC USES eax ebx edx esi;al je broj dugmica, esi je adresa prvog dugmeta
+mov ah, 1
+INC al
+DrawButtonsLoop:
+		push eax
+		cmp ah, SelectedButton
+		je SelectedButtonColor;boja selektovanog dugmeta
+
+		mov eax, brown + (Gray * 16);boja obicnog dugmeta
+		call SetTextColor 
+		jmp DoneSettingButtonColor
+
+		SelectedButtonColor:
+		mov eax, yellow + (Gray * 16)									 
+		call SetTextColor
+
+		DoneSettingButtonColor:
+		mov ebx, [esi]
+		mov dl, byte ptr [esi + 4]
+		mov dh, byte ptr [esi + 5]
+		call DrawSprite
+
+		mov eax, [esp]
+		cmp ah, SelectedButton
+		jne DontDrawSelectedChar
+		
+		mov dl, [esi + 6]
+		mov dh, [esi + 7]
+		mov al, 62;ascii za '>'
+		call GotoXY
+		call WriteChar
+		DontDrawSelectedChar:
+		pop eax
+		ADD esi, 8;duzina Dugme struct
+		INC ah
+		cmp ah, al
+	jne DrawButtonsLoop
+	RET
+
+DrawNubbins ENDP
+
+DrawGamePlayNubbins PROC USES edx ebx eax esi
 
 	mov dl, 0
 	mov dh, 28
@@ -469,41 +653,62 @@ DrawGamePlayNubbins PROC USES eax ebx edx esi
 	call DrawSprite ;crta pozadinu iza dugmica
 
 	mov esi, offset DugmiciTokomIgre
-	mov al, 1
-	DrawGameplayButtonsLoop:
-		mov dl, al
-		mov eax, brown + (Gray * 16);boja obicnog dugmeta
-		call SetTextColor 
+	mov al, 3
 
-		cmp dl, SelectedButton
-		jne SelectedButtonColorGameplay;boja selektovanog dugmeta
-		mov eax, yellow + (Gray * 16)									 
-		call SetTextColor
-
-		SelectedButtonColorGameplay:
-		mov al, dl;dl je sluzio kao privremeni brojac
-		mov ebx, [esi]
-		mov dl, byte ptr [esi + 4]
-		mov dh, byte ptr [esi + 5]
-		call DrawSprite
-
-		cmp al, SelectedButton
-		jne DontDrawSelectedChar
-		push eax
-		mov dl, [esi + 6]
-		mov dh, [esi + 7]
-		mov al, 62;ascii za '>'
-		call GotoXY
-		call WriteChar
-		pop eax
-		DontDrawSelectedChar:
-		ADD esi, 8;duzina Dugme struct
-		INC al
-		cmp al, 4
-		jne DrawGameplayButtonsLoop
-
+	call DrawNubbins
+	
 	RET
 DrawGamePlayNubbins ENDP
+
+ClearScreenFaster PROC
+
+	mov eax, brown + (Gray * 16)
+	call SetTextColor 
+    mov ebx, offset PraznaMesta
+	mov edx, 0 
+    ClearScreenLoop:
+    call GotoXY
+    push edx
+    mov edx, ebx
+    call WriteString
+    pop edx
+    INC dh
+    cmp dh, 32
+    jne ClearScreenLoop
+
+    RET
+
+
+ClearScreenFaster ENDP
+
+UpdateBrojIgracaMeni PROC USES eax ebx edx esi
+
+	call ClearScreenFaster
+	mov esi, offset DugmiciOdabiranjaKaraktera
+	mov al, 3
+
+	call DrawNubbins
+	mov eax, brown + (Gray * 16)
+	call SetTextColor 
+	movzx eax, SelectedButton
+	DEC eax
+	mov bl, 7
+	MUL bl
+	mov dl, 30
+	ADD dl, al;centrira poziciju karaktera
+	mov dh, 10
+	mov ebx, offset IgracSprite
+	mov al, SelectedButton;brojac
+	DrawDualShapiro:
+		call DrawSprite
+		SUB dl, 14
+		DEC al
+
+		cmp al, 0
+	jne DrawDualShapiro
+	
+	RET
+UpdateBrojIgracaMeni ENDP
 
 DrawBackGround PROC USES eax ebx edx ecx esi
 	mov eax, 1;brojac igraca
@@ -860,6 +1065,52 @@ DrawSprite PROC USES eax edx ebx ;eax temp, edx are the coordinates where to dra
     RET
 DrawSprite ENDP
 
+PustiStartDugmeAnimaciju PROC
+	mov eax, yellow + (CardBackground * 16)
+    call SetTextColor   
+	mov esi, offset StartDugme  
+	mov dl, [esi + 4]
+	mov dh, [esi + 5]
+	mov ebx, [esi];adresa sprajta
+	call DrawSprite
+	mov dl, [esi + 6]
+	mov dh, [esi + 7]
+	mov al, 62;ascii za '>'
+	call GotoXY
+	call WriteChar
+
+	mov eax, 300
+	call delay
+
+	mov eax, brown + (CardBackground * 16)
+    call SetTextColor   
+	mov dl, [esi + 4]
+	mov dh, [esi + 5]
+	mov ebx, [esi];adresa sprajta
+	call DrawSprite
+	mov dl, [esi + 6]
+	mov dh, [esi + 7]
+	mov al, 62;ascii za '>'
+	call GotoXY
+	call WriteChar
+
+	
+	mov eax, 300
+	call delay
+
+	mov eax, yellow + (CardBackground * 16)
+    call SetTextColor   
+	mov dl, [esi + 4]
+	mov dh, [esi + 5]
+	mov ebx, [esi];adresa sprajta
+	call DrawSprite
+
+	mov eax, 300
+	call delay
+	RET
+PustiStartDugmeAnimaciju ENDP
+
+
 
 main PROC
 
@@ -873,130 +1124,30 @@ main PROC
 	invoke SetConsoleTitle, addr winTitle							 ;// Postavlja title prozora
     invoke SetConsoleWindowInfo, stdOutHandle, TRUE, addr windowRect ;// Dimenzije prozora
 
-	mov BrojIgraca, 4
-	mov AktivniIgrac, 2
-
 	invoke getStdHandle, STD_INPUT_HANDLE
 	mov stdInHandle, eax
 	mov ecx, 10
-	;// Cita dva dogadjaja iz bafera
-	;invoke ReadConsoleInput, stdInHandle, addr temp, 1, addr bRead
-	;invoke ReadConsoleInput, stdInHandle, addr temp, 1, addr bRead
+	call Randomize
 
-    call Randomize
+	mov esi, offset SprajtoviIgraca
+	mov [esi], offset Igrac1Sprite
+	mov [esi+4], offset Igrac2Sprite
+	mov [esi+8], offset Igrac3Sprite
 
-	;/////////prep values
-	
-	mov esi, offset Okruzenja
-	mov edx, offset Igraci
-
-    mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+	mov esi, offset StartDugme
+	mov[esi], offset StartButtonSprite
 	ADD esi, 4
-	mov [esi], offset DealerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-	mov byte ptr [esi], 40;okvir u kome se dele karte
+	mov byte ptr [esi], 48
 	INC esi
-	mov byte ptr [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	mov byte ptr [esi], 23
 	INC esi
-	mov byte ptr [esi], 0;gde se crta prozor x
+	mov byte ptr [esi], 50
 	INC esi
-	mov byte ptr [esi], 0;gde se crta prozor y
+	mov byte ptr [esi], 24
 	INC esi
-	mov byte ptr [esi], 40;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 5;centar odakle se crtaju karte y
 
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-    
 
-	INC esi;okruzenje 2
-	ADD edx, 22;igrac 2
-
-	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-	mov byte ptr [esi], 14;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 0;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 11;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 6;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 20;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-
-	INC esi;okruzenje 3
-	ADD edx, 22;igrac 3
-
-	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-    
-	mov byte ptr [esi], 14;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 38;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 11;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 45;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 20;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-
-	INC esi;okruzenje 4
-	ADD edx, 22;igrac 4
-
-	mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
-	ADD esi, 4
-	mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
-	ADD esi, 4
-	mov byte ptr [esi], 14;okvir u kome se dele karte
-	INC esi
-	mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
-	INC esi
-	mov byte ptr [esi], 76;gde se crta prozor x
-	INC esi
-	mov byte ptr [esi], 11;gde se crta prozor y
-	INC esi
-	mov byte ptr [esi], 84;centar odakle se crtaju karte x
-	INC esi
-	mov byte ptr [esi], 20;centar odakle se crtaju karte y
-
-	mov byte ptr [edx], 0;broj karata
-	INC edx
-	mov byte ptr [edx], 0;broj peona
-	INC edx
-	mov byte ptr [edx], 0;broj pobeda
-	INC edx
-	mov byte ptr [edx], 0;flags
-
+	;GameplayDugmici Vrednosti
 	mov esi, offset DugmiciTokomIgre
 	mov[esi], offset HitButtonSprite
 	ADD esi, 4
@@ -1030,7 +1181,336 @@ main PROC
 	INC esi
 	mov byte ptr [esi], 29
 
+	;CharacterSelectDugmici Vrednosti
+	mov esi, offset DugmiciOdabiranjaKaraktera
+	mov[esi], offset JedanIgracButtonSprite
+	ADD esi, 4
+	mov byte ptr [esi], 2
+	INC esi
+	mov byte ptr [esi], 10
+	INC esi
+	mov byte ptr [esi], 4
+	INC esi
+	mov byte ptr [esi], 10
+	INC esi
 
+	mov[esi], offset DvaIgracaButtonSprite
+	ADD esi, 4
+	mov byte ptr [esi], 2
+	INC esi
+	mov byte ptr [esi], 13
+	INC esi
+	mov byte ptr [esi], 4
+	INC esi
+	mov byte ptr [esi], 13
+	INC esi
+
+	mov[esi], offset TriIgracaButtonSprite
+	ADD esi, 4
+	mov byte ptr [esi], 2
+	INC esi
+	mov byte ptr [esi], 16
+	INC esi
+	mov byte ptr [esi], 4
+	INC esi
+	mov byte ptr [esi], 16
+	INC esi
+
+	MainGameLoop:
+
+	call ClearScreenFaster
+	mov eax, brown + (gray * 16)	
+    call SetTextColor
+	mov edx, 0
+	mov ebx, offset TitleScreenSprite
+	call DrawSprite
+
+
+	MainMenueLoop:
+	invoke ReadConsoleInput, stdInHandle, addr temp,1,addr bRead
+	mov bx, word ptr temp
+	cmp bx, 1;proverava da li event dolazi sa tastature
+	jne MainMenueLoop
+
+	mov bl, byte ptr [temp + 4]
+	cmp bl, 0
+	je MainMenueLoop
+		mov bl, byte PTR [temp + 10]
+
+
+
+		cmp bl, RIGHT_KEY
+		je NumberOfPlayersSelectPrep
+
+	jmp MainMenueLoop
+
+	NumberOfPlayersSelectPrep:
+	call PustiStartDugmeAnimaciju
+
+
+	mov SelectedButton, 1
+	call UpdateBrojIgracaMeni
+	NumberOfPlayersSelectLoop:
+	
+
+	invoke ReadConsoleInput, stdInHandle, addr temp,1,addr bRead
+	mov bx, word ptr temp
+	cmp bx, 1;proverava da li event dolazi sa tastature
+	jne NumberOfPlayersSelectLoop
+
+	mov bl, byte ptr [temp + 4]
+	cmp bl, 0
+	je NumberOfPlayersSelectLoop
+		mov bl, byte PTR [temp + 10]
+
+
+
+		cmp bl, UP_KEY
+		je DecreaseNumOfPlayers
+
+		cmp bl, DOWN_KEY
+		je IncreaseNumOfPlayers
+
+		cmp bl, RIGHT_KEY
+		je PrepMainGame
+
+	jmp NumberOfPlayersSelectLoop
+
+	DecreaseNumOfPlayers:
+		mov al, SelectedButton
+		DEC al
+		cmp al, 0
+		jne SkipResettingNumPlayBottom
+		mov al, 3
+		SkipResettingNumPlayBottom:
+		mov SelectedButton, al
+		call UpdateBrojIgracaMeni
+	jmp NumberOfPlayersSelectLoop
+
+	IncreaseNumOfPlayers:
+		mov al, SelectedButton
+		INC al
+		cmp al, 4
+		jne SkipResettingNumPlayTop
+		mov al, 1
+		SkipResettingNumPlayTop:
+		mov SelectedButton, al
+		call UpdateBrojIgracaMeni
+	jmp NumberOfPlayersSelectLoop
+
+	PrepMainGame:
+
+	;PREP VREDNOSTI DEALERA
+
+	mov esi, offset Okruzenja
+	mov edx, offset Igraci
+
+    mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+	ADD esi, 4
+	mov [esi], offset DealerInterface;pointer ka sprajtu interfacea
+	ADD esi, 4
+	mov byte ptr [esi], 40;okvir u kome se dele karte
+	INC esi
+	mov byte ptr [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
+	INC esi
+	mov byte ptr [esi], 0;gde se crta prozor x
+	INC esi
+	mov byte ptr [esi], 0;gde se crta prozor y
+	INC esi
+	mov byte ptr [esi], 40;centar odakle se crtaju karte x
+	INC esi
+	mov byte ptr [esi], 5;centar odakle se crtaju karte y
+
+	mov byte ptr [edx], 0;broj karata
+	INC edx
+	mov byte ptr [edx], 0;broj peona
+	INC edx
+	mov byte ptr [edx], 0;broj pobeda
+	INC edx
+	mov byte ptr [edx], 0;flags
+
+	INC esi;okruzenje 2
+	ADD edx, 22;igrac 2
+
+	mov AktivniIgrac, 2
+
+	mov al, SelectedButton
+	cmp al, 1
+	je PrepOnePlayerGame
+
+	cmp al, 2
+	je PrepTwoPlayerGame
+
+		;/////////prep values 3 igraca
+
+		mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+		ADD esi, 4
+		mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
+		ADD esi, 4
+		mov byte ptr [esi], 14;okvir u kome se dele karte
+		INC esi
+		mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+		INC esi
+		mov byte ptr [esi], 0;gde se crta prozor x
+		INC esi
+		mov byte ptr [esi], 11;gde se crta prozor y
+		INC esi
+		mov byte ptr [esi], 6;centar odakle se crtaju karte x
+		INC esi
+		mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+		mov byte ptr [edx], 0;broj karata
+		INC edx
+		mov byte ptr [edx], 0;broj peona
+		INC edx
+		mov byte ptr [edx], 0;broj pobeda
+		INC edx
+		mov byte ptr [edx], 0;flags
+
+		INC esi;okruzenje 3
+		ADD edx, 22;igrac 3
+
+		mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+		ADD esi, 4
+		mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
+		ADD esi, 4
+		
+		mov byte ptr [esi], 14;okvir u kome se dele karte
+		INC esi
+		mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+		INC esi
+		mov byte ptr [esi], 38;gde se crta prozor x
+		INC esi
+		mov byte ptr [esi], 11;gde se crta prozor y
+		INC esi
+		mov byte ptr [esi], 45;centar odakle se crtaju karte x
+		INC esi
+		mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+		mov byte ptr [edx], 0;broj karata
+		INC edx
+		mov byte ptr [edx], 0;broj peona
+		INC edx
+		mov byte ptr [edx], 0;broj pobeda
+		INC edx
+		mov byte ptr [edx], 0;flags
+
+		INC esi;okruzenje 4
+		ADD edx, 22;igrac 4
+
+		mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+		ADD esi, 4
+		mov [esi], offset ThreePlayerInterface;pointer ka sprajtu interfacea
+		ADD esi, 4
+		mov byte ptr [esi], 14;okvir u kome se dele karte
+		INC esi
+		mov byte ptr [esi], 5;koliko karata moze da stoji u redu pre nego sto predje u novi red
+		INC esi
+		mov byte ptr [esi], 76;gde se crta prozor x
+		INC esi
+		mov byte ptr [esi], 11;gde se crta prozor y
+		INC esi
+		mov byte ptr [esi], 84;centar odakle se crtaju karte x
+		INC esi
+		mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+		mov byte ptr [edx], 0;broj karata
+		INC edx
+		mov byte ptr [edx], 0;broj peona
+		INC edx
+		mov byte ptr [edx], 0;broj pobeda
+		INC edx
+		mov byte ptr [edx], 0;flags
+
+		mov BrojIgraca, 4
+
+	jmp GameLoop
+
+	PrepTwoPlayerGame:
+
+		mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+		ADD esi, 4
+		mov [esi], offset TwoPlayerInterface;pointer ka sprajtu interfacea
+		ADD esi, 4
+		mov byte ptr [esi], 26;okvir u kome se dele karte
+		INC esi
+		mov byte ptr [esi], 10;koliko karata moze da stoji u redu pre nego sto predje u novi red
+		INC esi
+		mov byte ptr [esi], 0;gde se crta prozor x
+		INC esi
+		mov byte ptr [esi], 11;gde se crta prozor y
+		INC esi
+		mov byte ptr [esi], 16;centar odakle se crtaju karte x
+		INC esi
+		mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+		mov byte ptr [edx], 0;broj karata
+		INC edx
+		mov byte ptr [edx], 0;broj peona
+		INC edx
+		mov byte ptr [edx], 0;broj pobeda
+		INC edx
+		mov byte ptr [edx], 0;flags
+
+		INC esi;okruzenje 3
+		ADD edx, 22;igrac 3
+
+		mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+		ADD esi, 4
+		mov [esi], offset TwoPlayerInterface;pointer ka sprajtu interfacea
+		ADD esi, 4
+		mov byte ptr [esi], 26;okvir u kome se dele karte
+		INC esi
+		mov byte ptr [esi], 10;koliko karata moze da stoji u redu pre nego sto predje u novi red
+		INC esi
+		mov byte ptr [esi], 57;gde se crta prozor x
+		INC esi
+		mov byte ptr [esi], 11;gde se crta prozor y
+		INC esi
+		mov byte ptr [esi], 76;centar odakle se crtaju karte x
+		INC esi
+		mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+		mov byte ptr [edx], 0;broj karata
+		INC edx
+		mov byte ptr [edx], 0;broj peona
+		INC edx
+		mov byte ptr [edx], 0;broj pobeda
+		INC edx
+		mov byte ptr [edx], 0;flags
+
+		mov BrojIgraca, 3
+
+	jmp GameLoop
+
+	PrepOnePlayerGame: 
+
+		mov [esi], edx;pointer ka igracu koji igra u tom okruzenju
+		ADD esi, 4
+		mov [esi], offset OnePlayerInterface;pointer ka sprajtu interfacea
+		ADD esi, 4
+		mov byte ptr [esi], 40;okvir u kome se dele karte
+		INC esi
+		mov byte ptr [esi], 22;koliko karata moze da stoji u redu pre nego sto predje u novi red
+		INC esi
+		mov byte ptr [esi], 0;gde se crta prozor x
+		INC esi
+		mov byte ptr [esi], 11;gde se crta prozor y
+		INC esi
+		mov byte ptr [esi], 40;centar odakle se crtaju karte x
+		INC esi
+		mov byte ptr [esi], 20;centar odakle se crtaju karte y
+
+
+		mov byte ptr [edx], 0;broj karata
+		INC edx
+		mov byte ptr [edx], 0;broj peona
+		INC edx
+		mov byte ptr [edx], 0;broj pobeda
+		INC edx
+		mov byte ptr [edx], 0;flags
+
+		mov BrojIgraca, 2
 
 	GameLoop:;prvo se svim igracima dodeljuju pocetne karte pre nego sto igra pocne
 		mov SelectedButton, 0
@@ -1111,6 +1591,9 @@ main PROC
 
 				cmp bl, UP_KEY
 				je HandleGameplayButton
+
+				cmp bl, ESC_KEY
+				je PokaziPobednike
 
 		jmp PlayLoop
 
@@ -1288,7 +1771,7 @@ main PROC
 			cmp al, 11
 			jne DealerPlayLoop
 
-			mov byte ptr[esi + 1], 22
+			mov al, 22
 			mov ah, byte ptr[esi + 3]
 			OR ah, 8
 			mov byte ptr[esi + 3], ah
@@ -1402,9 +1885,108 @@ main PROC
 
 		jmp GameLoop
 
+		PokaziPobednike:
+			mov eax, brown + (gray * 16)	
+			call SetTextColor
+
+			call ClearScreenFaster
+			mov dl, 10
+			mov dh, 0
+			mov ebx,  offset PobedioJeSprite
+			call DrawSprite
+
+			mov esi, offset Igraci
+			mov cl, 0
+			mov bl, 1
+			mov bh, BrojIgraca
+			MaksimalniBrojPobedaLoop:
+			mov al, byte ptr[esi + 2]
+			cmp cl, al
+			jge NijeMaksPoena
+			mov cl, al
+			NijeMaksPoena:
+			INC bl
+			ADD esi, 25;velicina igraca struct
+			cmp bl,bh
+			jle MaksimalniBrojPobedaLoop
+
+			mov esi, offset Igraci
+			mov al, byte ptr[esi + 2];dealerovi poeni
+			cmp cl, al
+			je DealerPobedio
+
+
+
+				ADD esi, 25
+				mov ch, BrojIgraca
+				SUB ch, 2;prvi igrac ima indeks 0
+				mov eax, 18
+				MUL ch
+				mov dl, 36
+				mov dh, 10
+				SUB dl, al;pomera ulevo
+				
+				mov eax, offset SprajtoviIgraca
+				mov ch, 2
+				NacrtajIgracePobednike:
+					
+					mov ebx, offset IgracSprite
+
+					push eax
+					mov eax, brown + (gray * 16)	
+					call SetTextColor
+
+					cmp cl, byte ptr[esi + 2]
+					jne NemenajBojuPobednika
+					
+						mov eax, yellow + (gray * 16)	
+						call SetTextColor
+
+					NemenajBojuPobednika:
+					pop eax
+
+					call DrawSprite
+					cmp cl, byte ptr[esi + 2]
+					jne NePisiImePobednika
+
+						push edx
+
+						ADD dh, 17
+						mov ebx, DWORD ptr [eax]
+
+						call DrawSprite
+
+						pop edx 
+					NePisiImePobednika:
+					ADD dl, 30
+					ADD eax, 4;velicina dword
+					ADD esi, 25
+					INC ch
+				cmp ch, BrojIgraca
+				jle NacrtajIgracePobednike
+
+				mov eax, 10000
+				call delay
+				jmp MainGameLoop
+
+			DealerPobedio: 
+			mov dl, 0
+				mov dh, 6
+				mov ebx, offset DealerVictorySprite
+				call DrawSprite
+
+				mov eax, yellow + (gray * 16)	
+				call SetTextColor
+
+				mov dl, 30
+				mov dh, 24
+				mov ebx, offset DealerTextSprite
+				call DrawSprite
+
+				mov eax, 10000
+				call delay
+				jmp MainGameLoop
+
     exit
-    
-
-
 main ENDP
 END main
