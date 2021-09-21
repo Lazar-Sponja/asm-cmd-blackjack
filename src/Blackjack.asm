@@ -1,24 +1,4 @@
-COMMENT &
-/*****************************************************************
-           ****** IGRICA ZMIJICE ******
-
-Napisana koristeci Irvine32.inc biblioteku i Irvine-ove
-preporuke za modele koji se koriste i velicinu steka za rad
-u VS2017.
-Na samom pocetku korisnika docekuje interaktivni WELCOME meni
-u kom se vrsi izbor brzine kretanja zmijice, prilika da se 
-pokrene igra sa default vrednoscu brzine i opcija za napustanje
-igrice.
-U bilo kom trenutku tokom igranja moguce je napustiti igricu
-pritiskom na ESC dugme, cime se korisnik vraca na WELCOME meni
-gde se moze izabrati opcija za konacan izlazak iz igre.
-
-Kod i logika igrice su isparcani na najsitnije logicke celine
-grupisane u labele i procedure, kako bi krajnje upravljanje bilo
-jednostavno. Svaka procedura odradjuje pipav deo posla koji joj
-je prepusten, tako da je detaljisanje u main proceduri minimalno,
-bez guzve i necitkosti.
-*****************************************************************/&
+;TITLE ASM Command Line Blackjack  (Blackjack.asm)
 
 include Irvine32.inc
 include macros.inc
@@ -32,25 +12,17 @@ BackgroundColor = Gray
 CardBackground = Gray
 
 .const
-	;// Definisanje velicine prozora 
-	xmin = 0	;// leva ivica
-	xmax = 115	;// desna ivica
-	ymin = 0	;// gornja ivica
-	ymax = 31	;// donja ivica
+	;Definisanje velicine prozora 
+	xmin = 0	;leva ivica
+	xmax = 115	;desna ivica
+	ymin = 0	;gornja ivica
+	ymax = 31	;donja ivica
 
-	;// Oznake za levo, desno, gore, dole, ESC, ASCII
 	LEFT_KEY = 025h        
 	UP_KEY = 026h
 	RIGHT_KEY = 027h
 	DOWN_KEY = 028h
 	ESC_KEY = 01Bh
-	
-	;// Definisanje pocetnih koordinata zmijice i pocetnog smera kretanja
-	;// Valja blago prepraviti kod u initSnake kako bi se zmija postavila
-	;// vertikalno, umesto horizontalno, kao sto je trenutno.
-
-
-
 .data
   
 TitleScreenSprite byte 116,29,"	            ______   __                 __           _____              __                                        ",0         
@@ -249,27 +221,117 @@ IgracSprite byte 64,21, "                        _____             _____________
 								 byte"|                                                        |",0
 								 byte"|                                                        |",0
 								 byte"..........................................................",0
-	
+	;Karte se stampaju od vrha
     CardLookUpTable byte "123456789xJQK"
-    CardLookUPNumber10 byte "10",0
-    Card0 byte 13,8,"____________", 0,"|          |", 0,"|          |", 0,"|    /\    |", 0,"|    \/    |", 0,"|          |", 0,"|          |", 0,"____________",0
-    Card1 byte 13,8,"____________", 0,"|          |", 0,"|          |", 0,"|     O    |", 0,"|   O I O  |", 0,"|          |", 0,"|          |", 0,"____________",0
-    Card2 byte 13,8,"____________", 0,"|          |", 0,"|          |", 0,"|    nn    |", 0,"|    \/    |", 0,"|          |", 0,"|          |", 0,"____________",0
-    Card3 byte 13,8,"____________", 0,"|          |", 0,"|          |", 0,"|    /^\   |", 0,"|   * I *  |", 0,"|          |", 0,"|          |", 0,"____________",0
-	Card4 byte 13,8,"____________" ,0,"|          |", 0,"|B       ! |", 0,"|  L   J   |", 0,"|    A     |", 0,"|   C  C   |", 0,"| K      K |", 0,"____________",0
+    CardLookUPNumber10 byte "10", 0
 
-	Cardf0 byte 5,8,"  -|" ,0,"|` |", 0,"|' |", 0,"| ^|", 0,"| v|", 0,"|  |", 0,"|.'|", 0,"  -|",0
-	Cardf1 byte 5,8,"  -|" ,0,"|` |", 0,"|' |", 0,"| *|", 0,"|*||", 0,"|  |", 0,"|.'|", 0,"  -|",0
-	Cardf2 byte 5,8,"  -|" ,0,"|` |", 0,"|' |", 0,"| n|", 0,"| v|", 0,"|  |", 0,"|.'|", 0,"  -|",0
-	Cardf3 byte 5,8,"  -|" ,0,"|` |", 0,"|' |", 0,"| ^|", 0,"|*||", 0,"|  |", 0,"|.'|", 0,"  -|",0
-	Cardf4 byte 5,8,"|-  " ,0,"|;`|", 0,"||*|", 0,"| \|", 0,"|/;|", 0,"|;'|", 0,"| .|", 0,"|-  ",0
+    Card0 byte 13,8,"____________", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"|    /\    |", 0,
+					"|    \/    |", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"____________", 0
+    
+	Card1 byte 13,8,"____________", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"|     O    |", 0,
+					"|   O I O  |", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"____________", 0
+
+    Card2 byte 13,8,"____________", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"|    nn    |", 0,
+					"|    \/    |", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"____________", 0
+	
+    Card3 byte 13,8,"____________", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"|    /^\   |", 0,
+					"|   * I *  |", 0,
+					"|          |", 0,
+					"|          |", 0,
+					"____________", 0
+	
+	Card4 byte 13,8,"____________" ,0,
+					"|          |", 0,
+					"|B       ! |", 0,
+					"|  L   J   |", 0,
+					"|    A     |", 0,
+					"|   C  C   |", 0,
+					"| K      K |", 0,
+					"____________", 0
+
+	;Half flipped cards
+	Cardf0 byte 5,8,"  -|" ,0, 
+					"|` |", 0,
+					"|' |", 0,
+					"| ^|", 0,
+					"| v|", 0,
+					"|  |", 0,
+					"|.'|", 0,
+					"  -|", 0
+
+	Cardf1 byte 5,8,"  -|" ,0,
+					"|` |", 0,
+					"|' |", 0,
+					"| *|", 0,
+					"|*||", 0,
+					"|  |", 0,
+					"|.'|", 0,
+					"  -|", 0
+
+	Cardf2 byte 5,8,"  -|" ,0,
+					"|` |", 0,
+					"|' |", 0,
+					"| n|", 0,
+					"| v|", 0,
+					"|  |", 0,
+					"|.'|", 0,
+					"  -|", 0
+	
+	Cardf3 byte 5,8,"  -|" ,0,
+					"|` |", 0,
+					"|' |", 0,
+					"| ^|", 0,
+					"|*||", 0,
+					"|  |", 0,
+					"|.'|", 0,
+					"  -|", 0
+	
+	Cardf4 byte 5,8,"|-  " ,0,
+					"|;`|", 0,
+					"||*|", 0,
+					"| \|", 0,
+					"|/;|", 0,
+					"|;'|", 0,
+					"| .|", 0,
+					"|-  ", 0
 
 
-    HitButtonSprite byte 13,3, "------------",0,"|   H I T  |",0,"------------",0
-    StandButtonSprite byte 17,3,"----------------",0, "|   S T A N D  |", 0,"----------------",0
-    DoublDownButtonSprite byte 29,3,"----------------------------",0, "|   D O U B L E   D O W N  |", 0,"----------------------------",0
+    HitButtonSprite byte 13, 3, "------------", 0,
+							    "|   H I T  |", 0,
+								"------------", 0
+	
+    StandButtonSprite byte 17,3,"----------------", 0, 
+								"|   S T A N D  |", 0,
+								"----------------", 0
+	
+    DoublDownButtonSprite byte 29,3,"----------------------------", 0, 
+									"|   D O U B L E   D O W N  |", 0,
+									"----------------------------",0
 
-	StartButtonSprite byte 17,3,"----------------",0, "|   S T A R T  |", 0,"----------------",0
+	StartButtonSprite byte 17,3,"----------------", 0, 
+								"|   S T A R T  |", 0,
+								"----------------", 0
 
 	JedanIgracButtonSprite byte 11,1,"   1 Igrac",0
 	DvaIgracaButtonSprite byte 12,1,"   2 Igraca",0
@@ -290,7 +352,7 @@ IgracSprite byte 64,21, "                        _____             _____________
 	Igrac STRUCT
 		cardCount BYTE 0
 		pointCount BYTE 0
-		winCount  BYTE 0 ;maybe change to like a higher order so more games can be played
+		winCount  BYTE 0
 		Flags BYTE 0
 		cards BYTE 21 DUP(0)
 	Igrac ENDS
@@ -324,19 +386,16 @@ IgracSprite byte 64,21, "                        _____             _____________
 	KoordinatePraznogPolja byte 0,0
 	KoordinateSpilaKarata byte 99,0
 	
-	windowRect SMALL_RECT <xmin, ymin, xmax, ymax>      ;// Velicina prozora
-	winTitle byte "BlackJack", 0							;// Naslov programa
-	cursorInfo CONSOLE_CURSOR_INFO <>					;// Informacije o kursoru
-
-	
+	windowRect SMALL_RECT <xmin, ymin, xmax, ymax>      ;Velicina prozora
+	winTitle byte "ASM CMD Blackjack", 0				;Naslov programa
+	cursorInfo CONSOLE_CURSOR_INFO <>					;Informacije o kursoru
 
 .data?
-	;// Promenljive koje su potrebne za hendlovanje podataka unetih u konzolu tj. interakciju sa korisnikom
 	stdOutHandle handle ?
-	stdInHandle handle ?		;// Promenljiva za kontrolu inputa u konzolu
-	numInp dword ?				;// Broj bajtova u ulaznom baferu
-	temp byte 16 dup(?)			;// Promenljiva koja sadrzi podatke tipa INPUT_RECORD
-	bRead dword ?				;// Broj procitanih ulaznih bajtova
+	stdInHandle handle ?		;Promenljiva za kontrolu inputa u konzolu
+	numInp dword ?				;Broj bajtova u ulaznom baferu
+	temp byte 16 dup(?)			;Promenljiva koja sadrzi podatke tipa INPUT_RECORD
+	bRead dword ?				;Broj procitanih ulaznih bajtova
 
 	BrojRedovaCrtanjeKarta byte ?
 	BrojNacrtanihKarata byte ?
@@ -358,7 +417,7 @@ UpdatePlayFrame PROC USES eax esi;ne updatuje dugmice
 	mov esi, offset Okruzenja
 	
 	UpdateCardsForPlayers:
-    call NacrtajKarateIgraca
+    call NacrtajKarteIgraca
 	INC al
 	ADD esi, 14;velicina struct okruzenja
 	cmp al, BrojIgraca
@@ -405,23 +464,25 @@ DajAdresuFlipSprajta PROC;bl prima boju karte
 
 DajAdresuFlipSprajta ENDP
 
-PustiAnimacijuKarte PROC USES eax ebx edx ecx;al govori indeks karte, ah govori o tipu animacije
+PustiAnimacijuKarte PROC USES eax ebx edx ecx ;al govori indeks karte, ah govori o tipu animacije
 	call UpdatePlayFrame;ovim se pronalazi prazno polje gde karta treba da ide
 
 	push eax 
 	mov eax, brown + (gray * 16)	
     call SetTextColor
-	pop eax
 
 	cmp ah, 4
 	je CetvrtiTipAnimacije
 
-	mov dx, [offset KoordinateSpilaKarata]
-	mov cx, [offset KoordinatePraznogPolja]
+	mov eax, offset KoordinateSpilaKarata
+	mov dx, word ptr [eax] ;masm 6.14 compatibility fix
+	mov eax, offset KoordinatePraznogPolja
+	mov cx, word ptr [eax]
 	SUB cl, dl
 	SUB ch, dh;dobija se pomeraj od spila do praznog polja
 	SAR cl,2;deli sa 4
 	SAR ch,2;deli sa 4
+	pop eax
 	
 	cmp ah, 1
 	je PrviTipAnimacije
@@ -521,7 +582,8 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx;al govori indeks karte, ah govori 
 	jmp KrajAnimacije
 
 	CetvrtiTipAnimacije:;karta se okrece na mestu
-	mov dx, [offset KoordinatePraznogPolja]
+	mov edx, offset KoordinatePraznogPolja ;masm 6.14 compatability fix
+	mov dx, word ptr [edx]
 	mov ebx, offset Cardf4
 	call DrawSprite
 	mov bl, al
@@ -821,32 +883,31 @@ DrawBackGround PROC USES eax ebx edx ecx esi
 	RET
 DrawBackGround ENDP
 
-NacrtajKarateIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za racunanje, esi sadrzi adresu radnog ogruzenja u kome crta karte
+NacrtajKarteIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za racunanje, esi sadrzi adresu radnog ogruzenja u kome crta karte
 
-	mov ebx, [esi];pointer na igraca
-	ADD esi, 8
-	mov cx, [esi];granice prozora i koliko karata moze da ima prozor u jednom redu
-	ADD esi,4 
-	movzx eax, byte ptr [ebx]
+	
+	mov ebx, (OkruzenjeIgraca ptr [esi]).IgracUOkruzenju ;pointer na igraca
+	mov cx, word ptr (OkruzenjeIgraca ptr [esi]).VelicinaProzora  ;granice prozora i koliko karata moze da ima prozor u jednom redu.
+	movzx eax, (igrac ptr [ebx]).cardCount
 
 	cmp eax, 0
 	je KrajCrtanjaKarataIgraca
 
 	XOR edx,edx
 
-	DIV cl ;koliko ce biti redova
+	DIV cl ;koliko ce biti redova 
 	cmp ah, 0
 	je ZaokruzivanjeNaGoreSkip
 	INC al
 
 	ZaokruzivanjeNaGoreSkip:
-	mov dx, [esi];gde treba da crta karte
+	mov dx, word ptr (OkruzenjeIgraca ptr [esi]).KoordinateCentraZaCrtanjeKarata ;gde treba da crta karte
 
 	mov esi, ebx; esi je sada pointer na igraca
 	
 	mov BrojRedovaCrtanjeKarta, al ;BrojRedovaCrtanjeKarta ce da cuva broj redova
 	SHL al, 1 ;mnozi sa dva za pomeraj polovine vertikalnog razmaka kursora
-	SUB dh, al;vertikalna pocetna pozicija kursora
+	SUB dh, al;pomera kursor za al mesta na gore
 	mov BrojNacrtanihKarata, 0;vodi racuna koliko karata je nacrtano
 	mov al, BrojRedovaCrtanjeKarta
 
@@ -860,7 +921,7 @@ NacrtajKarateIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za 
 		mov al, cl;al prima koliko ce karata da crta u ovom redu
 		jmp PronadjenaKolicinaKarata
 		NijePunRedKarata:
-		mov al, [esi];esi pokazuje na koliko karata igrac ima u ruci
+		mov al, (igrac ptr [esi]).cardCount
 		SUB al, BrojNacrtanihKarata;isto al prima koliko karata treba da nacrta
 		PronadjenaKolicinaKarata:
 
@@ -932,25 +993,23 @@ NacrtajKarateIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za 
 		jne VerticalLoop
 	KrajCrtanjaKarataIgraca:
 	RET
-NacrtajKarateIgraca ENDP
+NacrtajKarteIgraca ENDP
 
-DrawCard PROC USES eax edx ebx ;eax temp, edx possisiton, bl indeks karte
-
-
+DrawCard PROC USES eax edx ebx ;eax temp, edx posisiton, bl indeks karte
 	cmp bl, 53;ne crta nista, ovo je korisno tokom animacije
 	jne NormalnaKarta1
-	mov [offset KoordinatePraznogPolja], dx;cuva koordinate praznog polja kako bi animacija znala gde da salje kartu
-
+	mov eax, offset KoordinatePraznogPolja ;masm 6.14 compatibility 
+	mov word ptr [eax], dx;cuva koordinate praznog polja kako bi animacija znala gde da salje kartu
 	RET
 
 	NormalnaKarta1:
-	cmp bl, 52;indeks facedown karte
-	jne NormalnaKarta2
-	mov eax, brown + (gray * 16)
-    call SetTextColor     
-	mov ebx, offset Card4;adresa sprajta za facedown kartu
-	call DrawSprite
-	RET
+		cmp bl, 52;indeks facedown karte
+		jne NormalnaKarta2
+		mov eax, brown + (gray * 16)
+    	call SetTextColor     
+		mov ebx, offset Card4;adresa sprajta za facedown kartu
+		call DrawSprite
+		RET
 
 	NormalnaKarta2:
     push edx
@@ -993,17 +1052,11 @@ DrawCard PROC USES eax edx ebx ;eax temp, edx possisiton, bl indeks karte
     call DrawSprite
 
     FinishDrawingCardFrame:
-
-
-    pop edx
-
-	AND edx, 255
-    SHR edx, 2
-
-    cmp edx, 9
+    pop edx ;popping card index
+	AND edx, 255 ;getting the last byte of the card index
+    SHR edx, 2 ;div by 4
+    cmp edx, 9 ;checking if card is 10 since it's two chars
     je CardNumber10
-
-
     mov ebx, offset CardLookUpTable
     ADD ebx, edx
     mov al, [ebx]
@@ -1020,7 +1073,7 @@ DrawCard PROC USES eax edx ebx ;eax temp, edx possisiton, bl indeks karte
     RET
 
     CardNumber10:
-
+	;10 sucks because of writeString and GotoXY using edx differently
     pop eax
     mov edx, eax
     INC dh
@@ -1028,40 +1081,32 @@ DrawCard PROC USES eax edx ebx ;eax temp, edx possisiton, bl indeks karte
     call GotoXY
     mov edx, offset CardLookUPNumber10
     call writeString
-    mov edx, eax
-    ADD dh, 7
+    mov edx, eax ;coordinates repoped
+    ADD dh, 7;7 here because going from corner instead of from top number
     ADD dl, 9
     call GotoXY
     mov edx, offset CardLookUPNumber10
     call writeString
-
-    
-
-RET
-
+	RET
 DrawCard ENDP
 
 DrawSprite PROC USES eax edx ebx ;eax temp, edx are the coordinates where to draw the sprite, ebx is the address of the sprite
-
-
-
-    mov ah, [ebx]
-    INC ebx
-    mov al, [ebx]
-    INC ebx
+    mov ah, [ebx] ;move width to ah
+    INC ebx ;ebx now points to height of sprite
+    mov al, [ebx] ;move hight to al
+    INC ebx ;ebx point to the sprite itself
     SpriteDrawLoop:
-    call GotoXY
-    push edx
-    mov edx, ebx
-    call WriteString
-    movzx edx, ah
-    ADD ebx, edx
-    pop edx
-    INC dh
-    DEC al
-    cmp al, 0
-    jne SpriteDrawLoop
-
+    	call GotoXY
+    	push edx ;write string also uses edx so it must be saved to stack first
+    	mov edx, ebx
+    	call WriteString 
+    	movzx edx, ah
+    	ADD ebx, edx
+    	pop edx
+    	INC dh
+    	DEC al
+    	cmp al, 0
+    	jne SpriteDrawLoop
     RET
 DrawSprite ENDP
 
@@ -1594,7 +1639,7 @@ main PROC
 
 				cmp bl, ESC_KEY
 				je PokaziPobednike
-
+mov ebx, offset Card4
 		jmp PlayLoop
 
 		DecrementSelectedButton:
