@@ -21,3 +21,6 @@ Then the function figures out the card number by integer diving the index by 4, 
 Special index numbers are 52 and 53. These are used for card animations
 - 52 tells the function to draw the back of the card
 - 53 skips drawing and saving coordinates to *KoordinatePraznogPolja*
+
+## `NacrtajKarteIgraca(player_ptr)`
+This function takes the pointer to a player table, in the register `esi`. This function draws cards that the player has in hand by calculating the number of rows that can fit on the players table, by moving up 2 times the number of cards rows up and $n$ times half a card width rows to the left, then drawing each row and dropping by 4 to draw the next row.

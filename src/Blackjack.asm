@@ -390,13 +390,12 @@ IgracSprite byte 64,21, "                        _____             _____________
 	winTitle byte "ASM CMD Blackjack", 0				;Naslov programa
 	cursorInfo CONSOLE_CURSOR_INFO <>					;Informacije o kursoru
 
-.data?
+.data?						
 	stdOutHandle handle ?
 	stdInHandle handle ?		;Promenljiva za kontrolu inputa u konzolu
 	numInp dword ?				;Broj bajtova u ulaznom baferu
 	temp byte 16 dup(?)			;Promenljiva koja sadrzi podatke tipa INPUT_RECORD
 	bRead dword ?				;Broj procitanih ulaznih bajtova
-
 	BrojRedovaCrtanjeKarta byte ?
 	BrojNacrtanihKarata byte ?
 	BrojIgraca byte ?
@@ -409,23 +408,18 @@ IgracSprite byte 64,21, "                        _____             _____________
 	SprajtoviIgraca DWORD 3 dup(?)
 
 .code
-
-
 UpdatePlayFrame PROC USES eax esi;ne updatuje dugmice
 	call DrawBackGround
 	mov eax, 1 
 	mov esi, offset Okruzenja
-	
 	UpdateCardsForPlayers:
-    call NacrtajKarteIgraca
-	INC al
-	ADD esi, 14;velicina struct okruzenja
-	cmp al, BrojIgraca
-	jle UpdateCardsForPlayers
-
-	mov eax, brown + (gray * 16)	
+    	call NacrtajKarteIgraca
+		INC al
+		ADD esi, SIZEOF OkruzenjeIgraca;velicina struct okruzenja
+		cmp al, BrojIgraca
+		jle UpdateCardsForPlayers
+	mov eax, brown + (gray * 16);resetovanje boja	
     call SetTextColor
-
 	RET	
 UpdatePlayFrame ENDP
 
@@ -435,32 +429,33 @@ DajAdresuFlipSprajta PROC;bl prima boju karte
 	cmp bl, 0
 	je DiamondFlip
 	cmp bl, 1
-	je ClovesFliped
+	je ClovesFlip
 	cmp bl, 2
-	je HeartFliped
+	je HeartFlip
 
-	mov eax, black + (CardBackground * 16)	
-    call SetTextColor
-	mov ebx, offset Cardf3
-	RET
+	SpadeFlip:
+		mov eax, black + (CardBackground * 16)	
+    	call SetTextColor
+		mov ebx, offset Cardf3
+		RET
 
 	DiamondFlip:
-	mov eax, red + (CardBackground * 16)	
-    call SetTextColor
-	mov ebx,offset Cardf0
-	RET
+		mov eax, red + (CardBackground * 16)	
+    	call SetTextColor
+		mov ebx,offset Cardf0
+		RET
 
-	ClovesFliped:
-	mov eax, black + (CardBackground * 16)	
-    call SetTextColor
-	mov ebx, offset Cardf1
-	RET
+	ClovesFlip:
+		mov eax, black + (CardBackground * 16)	
+    	call SetTextColor
+		mov ebx, offset Cardf1
+		RET
 
-	HeartFliped:
-	mov eax, red + (CardBackground * 16)	
-    call SetTextColor
-	mov ebx, offset Cardf2
-	RET
+	HeartFlip:
+		mov eax, red + (CardBackground * 16)	
+    	call SetTextColor
+		mov ebx, offset Cardf2
+		RET
 
 DajAdresuFlipSprajta ENDP
 
@@ -599,44 +594,40 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx ;al govori indeks karte, ah govori
 	RET	
 PustiAnimacijuKarte ENDP
 
-DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks karte, ah govori o tipu animacije koja se pusta kada se karta dodeljuje igracu
-
-	push eax
-	mov eax, 25;velicina igrac struct
+DodajKartuIgracu PROC USES eax esi ebx ecx ;ebx govori o igracu, al govori indeks karte, ah govori o tipu animacije koja se pusta kada se karta dodeljuje igracu
+	;Biranje igraca
+	push eax; eax sadrzi argument ali takodje je potreban za mnozenje
+	mov eax, SIZEOF Igrac
 	DEC bl
 	MUL bl
 	mov esi, offset Igraci
 	movzx ebx, al
-	ADD esi, ebx;AdresaIgraca
-	pop eax
-
-	movzx ebx, byte ptr[esi];koliko karata igrac ima u ruci
-	push esi
-
 	ADD esi, ebx
+	pop eax 
+
+	movzx ebx, (Igrac ptr [esi]).cardCount ;koliko karata igrac ima u ruci
+	mov ecx, esi 
+	ADD ecx, ebx;ecx sadrzi sada pokazac na predpredpredposlednju kartu 
+	ADD ecx, 3  ;ecx sadrzi sada pokazivac na poslednju kartu
 
 	cmp bl, 0
 	je SkipCheckingIfFlippedCard
 
-	cmp byte ptr[esi + 3], 52;proverava da li je poslednja karta u ruci flipovana
+	cmp byte ptr[ecx], 52;proverava da li je poslednja karta u ruci flipovana
 	je ReadyToAddCard;ako karta nije flipovana ne treba prepisati preko nje
 
 	SkipCheckingIfFlippedCard:
 	INC bl
-	pop esi
-	mov byte ptr [esi],bl;povecava broj karata u ruci igraca
-	push esi
-	ADD esi, ebx
+	mov (Igrac ptr [esi]).cardCount, bl;povecava broj karata u ruci igraca
+	INC ecx
 	ReadyToAddCard:
 	
-	mov byte ptr[esi + 3], 53;postavlja praznu kartu na polje
+	mov byte ptr[ecx], 53;postavlja praznu kartu na polje
 
 	call PustiAnimacijuKarte
 
-	mov byte ptr[esi + 3], al;postavlja kartu na polje
-	call UpdatePlayFrame
-
-	pop esi
+	mov byte ptr[ecx], al;postavlja kartu na polje
+	call UpdatePlayFrame ;nacrta novu kartu 
 
 	cmp al, 52;ako je dodeljena naopacke karta, onda se nista ne proracunava
 	je EndOfDodajKartu
@@ -648,21 +639,16 @@ DodajKartuIgracu PROC USES eax esi ebx;ebx govori o igracu, al govori indeks kar
 	mov al, 10
 	ClampovanjeVrednosti:
 
-	mov ah, [esi + 1];ukupan broj poena
-	ADD ah, al
-	mov [esi + 1], ah;zapisuje koliko poena ima igrac sada
-	mov bl, [esi + 3];flags
+	mov ah, (Igrac ptr [esi]).pointCount;ukupan broj poena
+	ADD ah, al;Dodavanje novih poena
+	mov (Igrac ptr [esi]).pointCount, ah;zapisuje koliko poena ima igrac sada
+	mov bl,(Igrac ptr [esi]).Flags;flags
 
 	cmp al, 1
-	jne SkipSettingOneFlag
-	OR bl, 4;sets the one flag
-	mov byte ptr [esi + 3], bl;saves the value
-	SkipSettingOneFlag:
-
-
-	
+	jne EndOfDodajKartu
+	OR bl, 4h ;sets the one flag, which is bit 3
+	mov (Igrac ptr [esi]).Flags, bl;saves the value
 	EndOfDodajKartu:
-
 	RET
 DodajKartuIgracu ENDP
 
@@ -773,51 +759,37 @@ UpdateBrojIgracaMeni PROC USES eax ebx edx esi
 UpdateBrojIgracaMeni ENDP
 
 DrawBackGround PROC USES eax ebx edx ecx esi
-	mov eax, 1;brojac igraca
+	mov cl, 1;brojac igraca
 	mov esi, offset Okruzenja
-
 	DrawPlayerInterfaces: 
-
-		cmp al, AktivniIgrac
+		cmp cl, AktivniIgrac
 		je PreskociCrtanjeZaSada;aktivni igrac treba poslednji da se crta
-		
-		push eax
-
 		mov eax, brown + (Gray * 16);Boja interfejsa i prozora. Upisuju se u al i ah registre, zato je zapis ovakav
  	    call SetTextColor  
-
-		mov ecx, [esi];adresa igraca
-		mov bl, byte ptr [ecx + 3];flags varijabla
-		push ebx;cuva flags varijable
-		AND bl, 1
-		cmp bl, 0
+		mov eax, (OkruzenjeIgraca ptr [esi]).IgracUOkruzenju ;adresa igraca
+		mov bl, (Igrac ptr [eax]).Flags
+		TEST bl, 1h ;vrh stacka pok
 		je SkipDrawingBustedFrame
-			mov eax, brown + (black * 16)
-			call SetTextColor  
+		mov eax, brown + (black * 16)
+		call SetTextColor  
 		SkipDrawingBustedFrame:
-
-		mov ebx, [esi + 4];adresa sprajta
-		mov dx, [esi + 10];koordinate sprajta
-		call DrawSprite
-
-		mov ebx, [esp];vraca ebx vrednost sa stakca u kome su flags variable
-		AND bl, 16;ovaj bit cuva da li je igrac pobedio
-		cmp bl, 0
-		je SkipDrawingVictoryFrame
+			mov ebx, (OkruzenjeIgraca ptr [esi]).SpriteZaOkruzenje;adresa sprajta
+			mov dx, word ptr (OkruzenjeIgraca ptr [esi]).KoordinateProzora ;koordinate sprajta
+			call DrawSprite
+			mov eax, (OkruzenjeIgraca ptr [esi]).IgracUOkruzenju
+			mov bl, (Igrac ptr [eax]).Flags ;vraca ebx vrednost sa stakca u kome su flags variable
+			TEST bl, 10h ;proveravamo bit 5 koji cuva da li je igrac pobedio
+			je SkipDrawingVictoryFrame
 			mov eax, yellow + (Gray * 16)
-			call SetTextColor  
+			call SetTextColor
 		SkipDrawingVictoryFrame:
-		
-		pop ebx
-		AND bl, 8;ovaj bit cuva da li je igrac dobio black jack
-		cmp bl, 0
-		je SkipDrawingBlackJackSprite
+			TEST bl, 8h ; proveravamo bit 4 koji gleda da li je igrac dobio blekdzek
+			je SkipDrawingBlackJackSprite
 			push edx
-			mov eax, [esi + 4];prve dve koordinate sprajta su velicina prozora x,y
-			mov dx, Word ptr[eax]
+			mov dx, word ptr [(OkruzenjeIgraca ptr [esi]).SpriteZaOkruzenje]
 			SHR dl, 1;deli dimenzije sa dva 
 			SHR dh, 1
-			mov eax, [esi + 10];koordinate prozora
+			mov ax, word ptr (OkruzenjeIgraca ptr [esi]).KoordinateProzora ;koordinate prozora
 			ADD dl, al;postavlja koordinate na centar prozora
 			ADD dh, ah
 			SUB dl, 17;polovina black jack sprajta
@@ -826,61 +798,45 @@ DrawBackGround PROC USES eax ebx edx ecx esi
 			call DrawSprite
 			pop edx
 		SkipDrawingBlackJackSprite:
-
-		cmp byte ptr[esp], 1;vrh stacka pokazuje do kog igraca je stiglo 
-		je SkipShiftingCursor;prvom igracu, to jest, dealeru, ne treba pomerati kursor za crtanje poena na ekran
-		INC dl;koordinate za crtanje poena
-		INC dh
-		SkipShiftingCursor:
-		call GotoXY
-
-		movzx eax, byte ptr [ecx + 2];poeni igraca
-		call WriteDec
-	
-
-		pop eax
-		PreskociCrtanjeZaSada:
-		
-		INC eax
-		ADD esi, 14;velicina strukture
-		cmp al, BrojIgraca
-		jle DrawPlayerInterfaces
-
-	movzx eax, AktivniIgrac;crtanje aktivnog igraca na kraju kako bi taj interface bio preko svih ostalih
-	cmp eax, 0
+			cmp cl, 1;vrh stacka pokazuje do kog igraca je stiglo 
+			je SkipShiftingCursor;prvom igracu, to jest, dealeru, ne treba pomerati kursor za crtanje poena na ekran
+			INC dl;koordinate za crtanje poena
+			INC dh
+			SkipShiftingCursor:
+			call GotoXY
+			mov ebx, (OkruzenjeIgraca ptr [esi]).IgracUOkruzenju
+			movzx eax, (Igrac ptr [ebx]).winCount ;poeni igraca
+			call WriteDec
+			PreskociCrtanjeZaSada:
+			INC ecx
+			ADD esi, SIZEOF OkruzenjeIgraca ;velicina strukture
+			cmp cl, BrojIgraca
+			jle DrawPlayerInterfaces
+	movzx ecx, AktivniIgrac ;crtanje aktivnog igraca na kraju kako bi taj interface bio preko svih ostalih
+	cmp ecx, 0
 	je EndOFDrawingBackground
-
-	push eax
 	mov eax, yellow + (Gray * 16)	
 	call SetTextColor
-	pop eax
-
-	DEC eax
-	mov cl, 14;velicina okruzenja
-	MUL cl
+	DEC ecx
+	mov eax, ecx ;popunjaca vise bajtove eax sa nulama i pomera nizi bajt. bitno
+	mov bl, SIZEOF OkruzenjeIgraca
+	MUL bl
 	mov esi, offset Okruzenja
 	ADD esi, eax;skace na adresu aktivnog korisnika
-	mov ebx, [esi + 4]
-	mov dx, [esi + 10]
-
-
+	mov ebx, (OkruzenjeIgraca ptr [esi]).SpriteZaOkruzenje
+	mov dx, word ptr (OkruzenjeIgraca ptr [esi]).KoordinateProzora
 	call DrawSprite
-	cmp eax, 0;ovo je pozicija dealera
+	cmp ecx, 0;ovo je pozicija dealera
 	je SkipShiftingCursorActive;prvom igracu, to jest, dealeru, ne treba pomerati kursor za crtanje poena na ekran
 	INC dl;koordinate za crtanje poena
 	INC dh
-
 	SkipShiftingCursorActive:
-
-	call GotoXY
-	mov ecx, [esi];adresa igraca
-	movzx eax, byte ptr [ecx + 2]
-	call WriteDec
-
-
+		call GotoXY
+		mov ebx, (OkruzenjeIgraca ptr [esi]).IgracUOkruzenju
+		movzx eax, (Igrac ptr [ebx]).winCount
+		call WriteDec
 	EndOFDrawingBackground:
-
-	RET
+		RET
 DrawBackGround ENDP
 
 NacrtajKarteIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za racunanje, esi sadrzi adresu radnog ogruzenja u kome crta karte
