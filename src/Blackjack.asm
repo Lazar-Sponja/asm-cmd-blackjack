@@ -404,7 +404,7 @@ IgracSprite byte 64,21, "                        _____             _____________
 
 .code
 UpdatePlayFrame PROC USES eax esi;ne updatuje dugmice
-	call DrawBackGround
+	call DrawBackground
 	mov eax, 1 
 	mov esi, offset Okruzenja
 	UpdateCardsForPlayers:
@@ -418,7 +418,7 @@ UpdatePlayFrame PROC USES eax esi;ne updatuje dugmice
 	RET	
 UpdatePlayFrame ENDP
 
-DajAdresuFlipSprajta PROC;bl prima boju karte
+DajAdresuFlipSprajta PROC;bl prima tip karte
 	and bl, 3;daje tip karte
 	cmp bl, 0
 	je DiamondFlip
@@ -459,14 +459,12 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx ;al govori indeks karte, ah govori
 	je CetvrtiTipAnimacije;okretanje dilerove facedown karte
 
 	;Priprema za ostale tipove animacija
-	mov ebx, offset KoordinateSpilaKarata
-	mov dx, word ptr [ebx] ;masm 6.14 compatibility fix
-	mov ebx, offset KoordinatePraznogPolja
-	mov cx, word ptr [ebx] ;masm 6.14 compatibility fix
+	mov dx, word ptr KoordinateSpilaKarata 
+	mov cx, word ptr KoordinatePraznogPolja
 	SUB cl, dl
-	SUB ch, dh;dobija se pomeraj od spila do praznog polja
-	SAR cl,2;deli sa 4
-	SAR ch,2;deli sa 4
+	SUB ch, dh ;dobija se pomeraj od spila do praznog polja
+	SAR cl,2 ;deli sa 4
+	SAR ch,2 ;deli sa 4
 	
 	;Provera koji tip animacije
 	cmp ah, 1
@@ -484,8 +482,8 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx ;al govori indeks karte, ah govori
 		ADD dh, ch;y projekcija
 		mov ebx, offset Cardf4
 		call DrawSprite
-		mov bl, al
-		push ebx
+		mov bl, al;stavljanje indeksa karte u bl
+		push ebx ;stavljanje indeksa karte na stek
 		mov eax, 300
 		call delay
 
@@ -579,8 +577,7 @@ PustiAnimacijuKarte PROC USES eax ebx edx ecx ;al govori indeks karte, ah govori
 	;Karta se okrece na mestu, okretanje dilerove klopke
 	CetvrtiTipAnimacije:
 		;Prvi frejm
-		mov edx, offset KoordinatePraznogPolja ;masm 6.14 compatability fix
-		mov dx, word ptr [edx]
+		mov dx, word ptr KoordinatePraznogPolja
 		mov ebx, offset Cardf4
 		call DrawSprite
 		mov bl, al
@@ -605,46 +602,46 @@ DodajKartuIgracu PROC USES eax esi ebx ecx ;ebx govori o igracu, al govori indek
 	ADD esi, ebx
 	pop eax 
 
+	;Dobijanje pozicije poslednje popunjene karte
 	movzx ebx, (Igrac ptr [esi]).cardCount ;koliko karata igrac ima u ruci
-	mov ecx, esi 
-	ADD ecx, ebx;ecx sadrzi sada pokazac na predpredpredposlednju kartu 
-	ADD ecx, 3  ;ecx sadrzi sada pokazivac na poslednju kartu
-
+	lea ecx, (Igrac ptr [esi-1]).cards ;broj karata ne racuna na to da se karte indeksiraju sa nulom pa mora da se stavi pokazivac za jedan manje
+	ADD ecx, ebx ;ecx sadrzi sada pokazac na poslednju kartu 
+	
+	;Povecavanja broja karata
 	cmp bl, 0
 	je SkipCheckingIfFlippedCard
-
-	cmp byte ptr[ecx], 52;proverava da li je poslednja karta u ruci flipovana
-	je ReadyToAddCard;ako karta nije flipovana ne treba prepisati preko nje
-
+	;if(cardCount==0)
+		cmp byte ptr[ecx], 52;proverava da li je poslednja karta u ruci flipovana
+		je ReadyToAddCard;ako karta nije flipovana ne treba prepisati preko nje
 	SkipCheckingIfFlippedCard:
-	INC bl
-	mov (Igrac ptr [esi]).cardCount, bl;povecava broj karata u ruci igraca
-	INC ecx
+	;else
+		INC bl
+		mov (Igrac ptr [esi]).cardCount, bl;povecava broj karata u ruci igraca
+		INC ecx ;pokazuje na sledecu kartu
+
+	;Dodavanje karte
 	ReadyToAddCard:
-	
 	mov byte ptr[ecx], 53;postavlja praznu kartu na polje
-
-	call PustiAnimacijuKarte
-
-	mov byte ptr[ecx], al;postavlja kartu na polje
-	call UpdatePlayFrame ;nacrta novu kartu 
-
-	cmp al, 52;ako je dodeljena naopacke karta, onda se nista ne proracunava
+	call PustiAnimacijuKarte ;Pusi da karta putuje od spila do ograca
+	mov byte ptr[ecx], al; dodaje igracu novu kartu
+	call UpdatePlayFrame ;nacrta novu kartu, do sada je bilo prazno polje
+	cmp al, 52	;ako je dodeljena naopacke karta, onda se nista ne proracunava
 	je EndOfDodajKartu
-
+	
+	;Azururanje poena 
 	SHR al,2;dobija vrednost karte od 0 do 12
 	INC al;od 1 do 13
 	cmp al, 10;posto karte sa vrednoscu preko 10 imaju vrednost deset
-	jl ClampovanjeVrednosti
+	jl SkipClamping
 	mov al, 10
-	ClampovanjeVrednosti:
-
+	SkipClamping:
 	mov ah, (Igrac ptr [esi]).pointCount;ukupan broj poena
 	ADD ah, al;Dodavanje novih poena
 	mov (Igrac ptr [esi]).pointCount, ah;zapisuje koliko poena ima igrac sada
+	
+	;Azuriranje flegova
 	mov bl,(Igrac ptr [esi]).Flags;flags
-
-	cmp al, 1
+	cmp al, 1 ;proverava da li igrac dobio keca
 	jne EndOfDodajKartu
 	OR bl, 4h ;sets the one flag, which is bit 3
 	mov (Igrac ptr [esi]).Flags, bl;saves the value
@@ -669,6 +666,7 @@ DrawNubbins PROC USES eax ebx edx esi ;al je broj dugmica, esi je adresa prvog d
 				call SetTextColor
 			
 			DoneSettingButtonColor:
+
 			;Crtanje sprajtova
 			mov ebx, (Dugme ptr [esi]).SpriteZaDugme
 			mov dx, word ptr (Dugme ptr [esi]).KoordinateSprajta
@@ -691,12 +689,12 @@ DrawNubbins PROC USES eax ebx edx esi ;al je broj dugmica, esi je adresa prvog d
 	
 DrawNubbins ENDP
 
-DrawGamePlayNubbins PROC USES eax esi;Poziva DrawNubbins za crtanje dugmica tokom igre
+DrawGameplayNubbins PROC USES eax esi;Poziva DrawNubbins za crtanje dugmica tokom igre
 	mov esi, offset DugmiciTokomIgre
 	mov al, 3
 	call DrawNubbins
 	RET
-DrawGamePlayNubbins ENDP
+DrawGameplayNubbins ENDP
 
 ClearScreenFaster PROC 
 	mov eax, brown + (Gray * 16)
@@ -744,7 +742,7 @@ UpdateBrojIgracaMeni PROC USES eax ebx edx esi
 	RET
 UpdateBrojIgracaMeni ENDP
 
-DrawBackGround PROC USES eax ebx edx ecx esi
+DrawBackground PROC USES eax ebx edx ecx esi
 	mov cl, 1;brojac igraca
 	mov esi, offset Okruzenja
 	;crtanje svih sem aktivnog igraca
@@ -773,8 +771,8 @@ DrawBackGround PROC USES eax ebx edx ecx esi
 			TEST bl, 8h ; proveravamo bit 4 koji gleda da li je igrac dobio blekdzek
 			jz SkipDrawingBlackJackSprite
 				push edx;cuva koordinate prozora na stek
-				mov ebx, (OkruzenjeIgraca ptr [esi]).SpriteZaOkruzenje
-				mov dx, word ptr [ebx];masm 6.14
+				mov ebx, (OkruzenjeIgraca ptr [esi]).SpriteZaOkruzenje  
+				mov dx, word ptr [ebx];masm 6.14, it just can't resolve memory indirect addressing correctly in this case
 				SHR dl, 1;deli dimenzije sa dva 
 				SHR dh, 1
 				mov ax, word ptr (OkruzenjeIgraca ptr [esi]).KoordinateProzora ;koordinate prozora
@@ -827,7 +825,7 @@ DrawBackGround PROC USES eax ebx edx ecx esi
 	call WriteDec
 	EndOFDrawingBackground:
 	RET
-DrawBackGround ENDP
+DrawBackground ENDP
 
 NacrtajKarteIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za racunanje, esi sadrzi adresu radnog ogruzenja u kome crta karte
 
@@ -941,117 +939,111 @@ NacrtajKarteIgraca PROC USES eax ecx edx ebx esi;eax, ebx, ecx, edx su temp za r
 	RET
 NacrtajKarteIgraca ENDP
 
-DrawCard PROC USES eax edx ebx ;eax temp, edx posisiton, bl indeks karte
+DrawCard PROC USES eax edx ebx ;eax temp, edx position, bl indeks karte
 	cmp bl, 53;ne crta nista, ovo je korisno tokom animacije
 	jne NormalnaKarta1
-	mov eax, offset KoordinatePraznogPolja ;masm 6.14 compatibility 
-	mov word ptr [eax], dx;cuva koordinate praznog polja kako bi animacija znala gde da salje kartu
+	mov word ptr KoordinatePraznogPolja, dx;cuva koordinate praznog polja kako bi animacija znala gde da salje kartu
 	RET
 
 	NormalnaKarta1:
 		cmp bl, 52;indeks facedown karte
 		jne NormalnaKarta2
-		mov eax, brown + (gray * 16)
-    	call SetTextColor     
-		mov ebx, offset Card4;adresa sprajta za facedown kartu
-		call DrawSprite
-		RET
-
+			;if(bl==52)
+			mov eax, brown + (gray * 16)
+    		call SetTextColor     
+			mov ebx, offset Card4;adresa sprajta za facedown kartu
+			call DrawSprite
+			RET
 	NormalnaKarta2:
-    push edx
-    push ebx
-    AND ebx, 3; moduo od 4 lol
+    push edx ;saving position to stack
+    push ebx ;saving card index to stack
+    AND ebx, 3 ;doing mod 4 on the index to determine symbol
 
+	;switch(bl)
     cmp bl, 0
     je Diamond
     cmp bl, 1
     je RoundLeafThing
     cmp bl, 2
     je Heart
-    ;ne treba poredjenje za poslednji jer je sigurno taj
 
-
-    mov eax, black + (CardBackground * 16)
-    call SetTextColor      
-    mov ebx, offset Card3 
-    call DrawSprite
-    jmp FinishDrawingCardFrame
+	Spade:
+    	mov eax, black + (CardBackground * 16)
+    	call SetTextColor      
+    	mov ebx, offset Card3 
+    	call DrawSprite
+    	jmp FinishDrawingCardFrame
 
     Diamond:
-    mov eax, red + (CardBackground * 16)
-    call SetTextColor      
-    mov ebx, offset Card0 
-    call DrawSprite
-    jmp FinishDrawingCardFrame
+    	mov eax, red + (CardBackground * 16)
+    	call SetTextColor      
+    	mov ebx, offset Card0 
+    	call DrawSprite
+    	jmp FinishDrawingCardFrame
 
     RoundLeafThing:
-    mov eax, black + (CardBackground * 16)
-    call SetTextColor      
-    mov ebx, offset Card1 
-    call DrawSprite
-    jmp FinishDrawingCardFrame
+    	mov eax, black + (CardBackground * 16)
+    	call SetTextColor      
+    	mov ebx, offset Card1 
+    	call DrawSprite
+    	jmp FinishDrawingCardFrame
 
     Heart:
-    mov eax, red + (CardBackground * 16)
-    call SetTextColor      
-    mov ebx, offset Card2 
-    call DrawSprite
+    	mov eax, red + (CardBackground * 16)
+    	call SetTextColor      
+    	mov ebx, offset Card2 
+    	call DrawSprite
 
     FinishDrawingCardFrame:
-    pop edx ;popping card index
-	AND edx, 255 ;getting the last byte of the card index
-    SHR edx, 2 ;div by 4
-    cmp edx, 9 ;checking if card is 10 since it's two chars
+    pop edx ;poping card index
+	;AND edx, 00FFh ;getting the last byte of the card index
+    SHR dl, 2 ;div by 4
+    cmp dl, 9 ;checking if card is 10 since it's two chars
     je CardNumber10
+	;else of if(card==10)
     mov ebx, offset CardLookUpTable
-    ADD ebx, edx
+    ADD bl, dl
     mov al, [ebx]
-    pop edx
-    INC dh
-    INC dl
+    pop edx ;popping coordinates from stack
+	ADD dx, 0101h ;going one down and one right form card corner
     call GotoXY
     call WriteChar
-
-    ADD dh, 6
-    ADD dl, 9
+    ADD dx, 0609h ;going 6 down and 9 right form previous location, aka diagonalish corner
     call GotoXY
     call WriteChar
     RET
 
-    CardNumber10:
 	;10 sucks because of writeString and GotoXY using edx differently
-    pop eax
-    mov edx, eax
-    INC dh
-    INC dl
-    call GotoXY
-    mov edx, offset CardLookUPNumber10
-    call writeString
-    mov edx, eax ;coordinates repoped
-    ADD dh, 7;7 here because going from corner instead of from top number
-    ADD dl, 9
-    call GotoXY
-    mov edx, offset CardLookUPNumber10
-    call writeString
-	RET
+    CardNumber10:
+    	;if(card==10)
+		pop eax ;popping coordinates from stack
+    	mov edx, eax
+		ADD dx, 0101h
+    	call GotoXY
+    	mov edx, offset CardLookUPNumber10
+    	call writeString
+    	mov edx, eax ;coordinates copied to edx
+    	ADD dx, 0709h;moving the number in the cornder one space back because 10 is bigger
+    	call GotoXY
+    	mov edx, offset CardLookUPNumber10
+    	call writeString
+		RET
 DrawCard ENDP
 
 DrawSprite PROC USES eax edx ebx ;eax temp, edx are the coordinates where to draw the sprite, ebx is the address of the sprite
-    mov ah, [ebx] ;move width to ah
-    INC ebx ;ebx now points to height of sprite
-    mov al, [ebx] ;move hight to al
-    INC ebx ;ebx point to the sprite itself
+    mov ax, word ptr [ebx] ;move width and height to ax
+	ADD ebx, 2 ;ebx point the the begining of the sprite
     SpriteDrawLoop:
     	call GotoXY
     	push edx ;write string also uses edx so it must be saved to stack first
     	mov edx, ebx
     	call WriteString 
-    	movzx edx, ah
+    	movzx edx, al
     	ADD ebx, edx
     	pop edx
     	INC dh
-    	DEC al
-    	cmp al, 0
+    	DEC ah
+    	cmp ah, 0
     	jne SpriteDrawLoop
     RET
 DrawSprite ENDP
@@ -1092,8 +1084,6 @@ PustiStartDugmeAnimaciju PROC
 	call delay
 	RET
 PustiStartDugmeAnimaciju ENDP
-
-
 
 main PROC
 
@@ -1323,7 +1313,7 @@ main PROC
 		mov SelectedButton, 0
 		mov AktivniIgrac, 0;nijedan igrac nije aktivan na pocetku
 		call UpdatePlayFrame
-		call DrawGamePlayNubbins
+		call DrawGameplayNubbins
 
 		mov eax, 500
 		call delay
@@ -1406,11 +1396,11 @@ main PROC
 			je SetGameplayButtonTop
 			DEC bl
 			mov SelectedButton, bl
-			call DrawGamePlayNubbins
+			call DrawGameplayNubbins
 			jmp PlayLoop
 			SetGameplayButtonTop:
 			mov SelectedButton, 3
-			call DrawGamePlayNubbins
+			call DrawGameplayNubbins
 			jmp PlayLoop
 
 		IncrementSelectedButton:
@@ -1419,11 +1409,11 @@ main PROC
 			je SetGameplayButtonBottom
 			INC bl
 			mov SelectedButton, bl
-			call DrawGamePlayNubbins
+			call DrawGameplayNubbins
 			jmp PlayLoop
 			SetGameplayButtonBottom:
 			mov SelectedButton, 1
-			call DrawGamePlayNubbins
+			call DrawGameplayNubbins
 			jmp PlayLoop
 
 		HandleGameplayButton:
@@ -1532,7 +1522,7 @@ main PROC
 			mov AktivniIgrac, al
 
 			call UpdatePlayFrame
-			call DrawGamePlayNubbins
+			call DrawGameplayNubbins
 			ADD esi, SIZEOF Igrac
 
 			mov al, (Igrac ptr [esi]).Flags;flags
@@ -1546,7 +1536,7 @@ main PROC
 			mov AktivniIgrac, 1
 			mov SelectedButton, 0
 			call UpdatePlayFrame
-			call DrawGamePlayNubbins
+			call DrawGameplayNubbins
 
 			mov ebx, 1
 			OdaberiKartu
@@ -1614,75 +1604,62 @@ main PROC
 		jmp ZavrsiRundu
 
 		ZavrsiRundu:
-
 		;mov byte ptr [esi + 1], al; zapisuje dealerove poene
-		mov bl, 2;brojac za prvog igraca
+		mov cl, 2;brojac za prvog igraca
 		mov ah, NajPoenaSkuplenihURundi
 		cmp al, ah
 		jle DodajPoeneIgracima
+			;if(dealer_has_most_points)
+			mov ah, (Igrac ptr [esi]).Flags;dilerovi flegovi
+            OR ah, 16;bit za pobedu
+            mov (Igrac ptr [esi]).Flags, ah
+            mov ah, (Igrac ptr [esi]).winCount
+            INC ah
+            mov (Igrac ptr [esi]).winCount, ah;povecava broj pobeda
+            jmp PrikaziPobednikeRunde
 
-		mov ah, byte ptr[esi + 3]
-		OR ah, 16;bit za pobedu
-		mov byte ptr[esi + 3], ah
-		mov ah, byte ptr[esi + 2]
-		INC ah
-		mov byte ptr[esi + 2], ah;povecava broj pobeda
-
-		DodajPoeneIgracima:
-			
-			ADD esi, 25;velicina igraci struct
-
-			mov al, byte ptr [esi + 1];broj poena
-			cmp al, ah
-			jne IgracNijePobedio
-
-			mov al, byte ptr [esi + 2];koliko pobeda ima igrac
-			mov cl, byte ptr [esi + 3];flags
-			mov ch, cl
-			AND cl, 2;da li je igrac double downovao
-			cmp cl, 0;ako nije double downovao
-			je NijeDoubleDownovao;povecaj broj poena jedanput
-			INC al
-			NijeDoubleDownovao:
-			INC al
-			mov byte ptr [esi + 2], al;upisuje broj pobeda
-
-			OR ch, 16;zapisuje da je igrac pobedio
-			mov byte ptr [esi + 3], ch
-
-			IgracNijePobedio:
-
-			INC bl;brojac igraca
-			cmp bl, BrojIgraca
-		jle DodajPoeneIgracima;ako ima jos igraca
+        DodajPoeneIgracima:
+            ADD esi, SIZEOF Igrac ;velicina igraci struct
+            mov al, byte ptr (Igrac ptr [esi]).pointCount ;broj poena
+            cmp al, ah
+            jne IgracNijePobedio
+            mov al, byte ptr (Igrac ptr [esi]).winCount ;koliko pobeda ima igrac
+            mov bl, byte ptr (Igrac ptr [esi]).Flags; flags
+            TEST bl, 2 ;da li je igrac double downovao
+            jz NijeDoubleDownovao ;povecaj broj poena jedanput
+            INC al
+            NijeDoubleDownovao:
+            INC al
+            mov (Igrac ptr [esi]).winCount, al ;upisuje broj pobeda
+            OR bl, 16 ;zapisuje da je igrac pobedio
+            mov (Igrac ptr [esi]).Flags, bl
+            IgracNijePobedio:
+            INC cl;brojac igraca
+            cmp cl, BrojIgraca
+        jle DodajPoeneIgracima;ako ima jos igraca
+        PrikaziPobednikeRunde:
 
 		mov AktivniIgrac, 0
 		call UpdatePlayFrame
-		mov eax, 3000
+		mov eax, 2000
 		call delay
 
-		mov bl, BrojIgraca
-		mov esi, offset Igraci
-		OcistiVarijableZaNovuRundu:
-
-			mov byte ptr[esi], 0;broj karata u ruci
-			mov byte ptr[esi + 1], 0;broj poena 
-			mov byte ptr[esi + 3], 0;flags
-
-			ADD esi, 25
-			DEC bl
-			cmp bl, 0
-		jne OcistiVarijableZaNovuRundu
-
-		jmp GameLoop
+        movzx ecx, BrojIgraca
+        mov esi, offset Igraci
+        OcistiVarijableZaNovuRundu:
+            mov (Igrac ptr [esi]).cardCount, 0;broj karata u ruci
+            mov (Igrac ptr [esi]).pointCount, 0;broj poena 
+            mov (Igrac ptr [esi]).flags, 0;flags
+            ADD esi, SIZEOF Igrac
+            loop OcistiVarijableZaNovuRundu
+        jmp GameLoop
 
 		PokaziPobednike:
 			mov eax, brown + (gray * 16)	
 			call SetTextColor
 
 			call ClearScreenFaster
-			mov dl, 10
-			mov dh, 0
+			mov dx, 000Ah;(10, 0)
 			mov ebx,  offset PobedioJeSprite
 			call DrawSprite
 
@@ -1691,93 +1668,83 @@ main PROC
 			mov bl, 1
 			mov bh, BrojIgraca
 			MaksimalniBrojPobedaLoop:
-			mov al, byte ptr[esi + 2]
-			cmp cl, al
-			jge NijeMaksPoena
-			mov cl, al
-			NijeMaksPoena:
-			INC bl
-			ADD esi, 25;velicina igraca struct
-			cmp bl,bh
-			jle MaksimalniBrojPobedaLoop
-
+				mov al, (Igrac ptr [esi]).winCount
+				cmp cl, al
+				jge NijeMaksPoena
+				mov cl, al
+				NijeMaksPoena:
+				INC bl
+				ADD esi, SIZEOF Igrac
+				cmp bl, bh
+				jle MaksimalniBrojPobedaLoop
 			mov esi, offset Igraci
-			mov al, byte ptr[esi + 2];dealerovi poeni
+			mov al, (Igrac ptr [esi]).winCount;dealerovi poeni
 			cmp cl, al
 			je DealerPobedio
 
-
-
-				ADD esi, 25
-				mov ch, BrojIgraca
-				SUB ch, 2;prvi igrac ima indeks 0
-				mov eax, 18
-				MUL ch
-				mov dl, 36
-				mov dh, 10
-				SUB dl, al;pomera ulevo
-				
-				mov eax, offset SprajtoviIgraca
-				mov ch, 2
-				NacrtajIgracePobednike:
-					
-					mov ebx, offset IgracSprite
-
-					push eax
-					mov eax, brown + (gray * 16)	
+			;Players won
+			ADD esi, SIZEOF Igrac
+			mov ch, BrojIgraca
+			SUB ch, 2;prvi igrac ima indeks 0
+			mov eax, 18
+			MUL ch
+			mov dx, 0A24h ;(36,10)
+			SUB dl, al;pomera ulevo
+			mov eax, offset SprajtoviIgraca
+			mov ch, 2
+			NacrtajIgracePobednike:
+				mov ebx, offset IgracSprite
+				push eax
+				mov eax, brown + (gray * 16)	
+				call SetTextColor
+				cmp cl, (Igrac ptr [esi]).winCount
+				jne NemenajBojuPobednika
+					mov eax, yellow + (gray * 16)	
 					call SetTextColor
-
-					cmp cl, byte ptr[esi + 2]
-					jne NemenajBojuPobednika
-					
-						mov eax, yellow + (gray * 16)	
-						call SetTextColor
-
-					NemenajBojuPobednika:
-					pop eax
-
+				NemenajBojuPobednika:
+				pop eax
+				call DrawSprite
+				cmp cl, (Igrac ptr [esi]).winCount
+				jne NePisiImePobednika
+					push edx
+					ADD dh, 17
+					mov ebx, DWORD ptr [eax]
 					call DrawSprite
-					cmp cl, byte ptr[esi + 2]
-					jne NePisiImePobednika
-
-						push edx
-
-						ADD dh, 17
-						mov ebx, DWORD ptr [eax]
-
-						call DrawSprite
-
-						pop edx 
-					NePisiImePobednika:
-					ADD dl, 30
-					ADD eax, 4;velicina dword
-					ADD esi, 25
-					INC ch
-				cmp ch, BrojIgraca
-				jle NacrtajIgracePobednike
-
-				mov eax, 10000
-				call delay
-				jmp MainGameLoop
+					pop edx 
+				NePisiImePobednika:
+				ADD dl, 30
+				ADD eax, TYPE DWORD
+				ADD esi, SIZEOF Igrac
+				INC ch
+			cmp ch, BrojIgraca
+			jle NacrtajIgracePobednike
+			mov eax, 5000
+			call delay
+			jmp ResetGame
 
 			DealerPobedio: 
-			mov dl, 0
-				mov dh, 6
+				mov dx, 0600h
 				mov ebx, offset DealerVictorySprite
 				call DrawSprite
-
 				mov eax, yellow + (gray * 16)	
 				call SetTextColor
-
-				mov dl, 30
-				mov dh, 24
+				mov dx, 181Eh ;(30,24)
 				mov ebx, offset DealerTextSprite
 				call DrawSprite
-
-				mov eax, 10000
+				mov eax, 5000
 				call delay
-				jmp MainGameLoop
-
+				jmp ResetGame
+		ResetGame:
+		movzx ecx, BrojIgraca
+        mov esi, offset Igraci
+			ResetLoop:
+		    mov (Igrac ptr [esi]).cardCount, 0;broj karata u ruci
+            mov (Igrac ptr [esi]).pointCount, 0;broj poena 
+            mov (Igrac ptr [esi]).flags, 0;flags
+            mov (Igrac ptr [esi]).winCount, 0;flags
+            ADD esi, SIZEOF Igrac
+            loop ResetLoop
+		jmp MainGameLoop
     exit
 main ENDP
 END main

@@ -36,5 +36,37 @@
             "problemMatcher": [],
             "group": "build"
         },
+        {
+            "label": "Build Release",
+            "type": "shell",
+            "command": "ml.exe",
+            "args": [
+                "/Sa",
+                "/Fodebug\\${fileBasenameNoExtension}.obj",
+                "/I\"c:\\Irvine\"",
+                "/W3",
+                "/Ta${file}",
+                "/link",
+                "/OUT:${fileBasenameNoExtension}.exe", 
+                "/LIBPATH:c:\\Irvine", 
+                "user32.lib",
+                "irvine32.lib",
+                "kernel32.lib",
+                "/SUBSYSTEM:CONSOLE",
+                "/DYNAMICBASE:NO",
+                "/MACHINE:X86",
+                "/SAFESEH:NO",
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": "build"
+        },
     ]
 }
