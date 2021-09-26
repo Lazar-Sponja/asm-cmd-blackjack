@@ -30,12 +30,12 @@ Special index numbers are 52 and 53. These are used for card animations
 
 ## `NacrtajKarteIgraca(esi:player_ptr)`
 This function draws cards that the player has in hand by calculating the number of rows that can fit on the player's table, then does the following:
-- Moves up 2 times the number of cards rows up and $n$ times half a card widths to the left
+- Moves up 2 times the number of cards rows up and _n_ times half a card widths to the left
 - Draws cards in a row card by card until it hit the max number of cards per row *(max number of cards per row is a variable in the `IgracUOkruzenju` struct whose value get's initalized in main based on how many player are active at a time)*
 - Drops by 4 and draws another row. It repeats this until the player runs out of cards
 
 There are a few exceptions to these rules, such as:
-- When moving back, $n$ cards widths, if the edge of the table has been reached, cards will start to be drawn denser, as the cursor will move less to the right when drawing the rest of the cards in order to fit in the row
+- When moving back, _n_ cards widths, if the edge of the table has been reached, cards will start to be drawn denser, as the cursor will move less to the right when drawing the rest of the cards in order to fit in the row
 
 
 ## `DrawBackground()`
