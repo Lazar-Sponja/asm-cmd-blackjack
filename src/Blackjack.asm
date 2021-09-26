@@ -1744,6 +1744,7 @@ main PROC
             mov (Igrac ptr [esi]).winCount, 0;flags
             ADD esi, SIZEOF Igrac
             loop ResetLoop
+		call clrscr
 		jmp MainGameLoop
     exit
 main ENDP
