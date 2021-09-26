@@ -5,3 +5,5 @@ src/hello.asm
 src/StructExample.asm
 mllink$.lnk
 images
+src/Blackjack.obj
+src/Blackjack.exe
