@@ -67,7 +67,7 @@ This assumes you are using visual studio build tools
 
 1. Launch the developer console and change into the directory with your .asm file
 2. Run the following command:
-```
+```sh
 ml /Sg /Zi /FoBlackjack.obj /I "c:\Irvine" /W3 /TaBlackjack.asm /link /OUT:Blackjack.exe /LIBPATH:c:\Irvine user32.lib irvine32.lib kernel32.lib /SUBSYSTEM:CONSOLE /DYNAMICBASE:NO /MACHINE:X86 /SAFESEH:NO
 ``` 
 
@@ -76,7 +76,7 @@ That's it! You can now play some ascii blackjack!
 If for some reason you want to debug the game, you need to complie the game with the following command:
 
 ```console
-ml.exe /Sg /Zi /FoBlackjack.obj /I "c:\Irvine" /W3 /Blackjack.asm /link /OUT:Blackjack.exe /LIBPATH:c:\Irvine user32.lib irvine32.lib kernel32.lib odbccp32.lib /DEBUG /PDB:Blackjack.pdb /SUBSYSTEM:CONSOLE /DYNAMICBASE:NO /MACHINE:X86 /SAFESEH:NO 
+ml /Sg /Zi /FoBlackjack.obj /I "c:\Irvine" /W3 /Blackjack.asm /link /OUT:Blackjack.exe /LIBPATH:c:\Irvine user32.lib irvine32.lib kernel32.lib odbccp32.lib /DEBUG /PDB:Blackjack.pdb /SUBSYSTEM:CONSOLE /DYNAMICBASE:NO /MACHINE:X86 /SAFESEH:NO 
 ```
 
 ## Building on linux
