@@ -1,9 +1,5 @@
-debug
-src/snek.asm
-src/AddSub2.asm
-src/hello.asm
-src/StructExample.asm
 mllink$.lnk
-images
 src/Blackjack.obj
 src/Blackjack.exe
+debug/Blackjack.obj
+debug/Blackjack.exe

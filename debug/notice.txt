@@ -1,0 +1,1 @@
+The pictures for the README file are dumped here, so this folder appears on git too

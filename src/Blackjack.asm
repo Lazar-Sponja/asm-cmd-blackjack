@@ -381,7 +381,7 @@ IgracSprite byte 64,21, "                        _____             _____________
 	KoordinateSpilaKarata byte 99,0
 	
 	windowRect SMALL_RECT <xmin, ymin, xmax, ymax>      ;Velicina prozora
-	winTitle byte "ASM CMD Blackjack", 0				;Naslov programa
+	winTitle byte "ASCII Blackjack", 0				;Naslov programa
 	cursorInfo CONSOLE_CURSOR_INFO <>
 	Igraci Igrac 4 dup(<>)
 						
@@ -1741,7 +1741,7 @@ main PROC
 		    mov (Igrac ptr [esi]).cardCount, 0;broj karata u ruci
             mov (Igrac ptr [esi]).pointCount, 0;broj poena 
             mov (Igrac ptr [esi]).flags, 0;flags
-            mov (Igrac ptr [esi]).winCount, 0;flags
+            mov (Igrac ptr [esi]).winCount, 0;broj pobeda
             ADD esi, SIZEOF Igrac
             loop ResetLoop
 		call clrscr
