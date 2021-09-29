@@ -58,7 +58,7 @@ To assemble the game, you need the [irvine32 library](https://github.com/Eazybri
 
 If you're assembling the game manually on windows, it is recommended that you get [visual studio build tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019) and call `ml.exe` directly from it's developer console, but any version of masm should work. 
 
-The project comes with premade vscode build tasks and debug tasks for automating the assembly of code. This requires you to launch vscode from the visual studio developer console, as the build tools do not add `ml.exe`, `link.exe` nor the standard windows libraries to `$Env:PATH`
+The project comes with premade [vscode](https://code.visualstudio.com/) build tasks and debug tasks for automating the assembly of code. This requires you to launch vscode from the visual studio developer console, as the build tools do not add `ml.exe`, `link.exe` nor the standard windows libraries to `$Env:PATH`. It also requires the [C/C++ plugin](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) for the use of the debugger. Optionally, but recommended is the [ASM Code Lens plugio](https://marketplace.visualstudio.com/items?itemName=maziac.asm-code-lens) for syntax highlighting. 
 
 Another way to auto assemble the code is to just get [visual studio](https://visualstudio.microsoft.com/), as it just works. This option is not recommended as visual studio is a bit overkill for such a simple project.
 
